@@ -204,10 +204,15 @@ const esc=s=>(s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;
 const norm=s=>(s||'').replace(/["'`״׳()]/g,'').replace(/[\-–—]/g,' ').replace(/\s+/g,' ').trim();
 const col=(h,...names)=>{for(const n of names){const i=h.findIndex(c=>c.includes(n));if(i>=0)return i}return -1};
 
-const SLOTS=[{id:1,label:'רצועה 1',time:'09:30–11:00',keys:['9:30','9:00']},
-             {id:2,label:'רצועה 2',time:'11:10–12:40',keys:['11:10']},
-             {id:3,label:'רצועה 3',time:'14:00–15:30',keys:['14:00']}];
-const slotsFrom=txt=>SLOTS.filter(s=>s.keys.some(k=>(txt||'').includes(k))).map(s=>s.id);
+const SLOTS=[{id:1,label:'רצועה 1',time:'09:30–11:00',day:'שלישי',keys:['9:30','9:00']},
+             {id:2,label:'רצועה 2',time:'11:10–12:40',day:'שלישי',keys:['11:10']},
+             {id:3,label:'רצועה 3',time:'14:00–15:30',day:'שלישי',keys:['14:00']},
+             /* רצועה 4 — פרדס חנה, יום רביעי 12:00–13:30. בגיליון היא נכתבת כטוקן '14:00-4' (מזהה בלבד, לא שעה) */
+             {id:4,label:'רצועה 4',time:'12:00–13:30',day:'רביעי',keys:[]}];
+const dayOf=s=>s.day&&s.day!=='שלישי'?' · יום '+s.day:'';
+const slotsFrom=txt=>{const t=txt||'';
+  if(/14:00\s*-\s*4(?!\d)/.test(t)||/\b12:00\b/.test(t)) return [4];
+  return SLOTS.filter(s=>s.keys.some(k=>t.includes(k))).map(s=>s.id)};
 const genFrom=txt=>{const n=norm(txt);
   if(/שניהם|מעורב|בנים ובנות/.test(n))return'מעורב';
   if(/בנות/.test(n))return'בנות'; if(/בנים/.test(n))return'בנים'; return''};
@@ -241,13 +246,13 @@ async function getAssignMap(){
     const map={};
     rows.slice(1).forEach(r=>{
       if(!r[cN]) return;
-      map[norm(r[cN])]={
+      (map[norm(r[cN])]=map[norm(r[cN])]||[]).push({
         gender: cG>=0?(genFrom(r[cG])||''):'',
         slots:  cS>=0?slotsFrom(r[cS]):[],
         teacher:cT>=0?(r[cT]||''):'',
         school: cSc>=0?(r[cSc]||''):'',
         status: cSt>=0?(r[cSt]||''):''
-      };
+      });
     });
     return map;
   }catch(e){ console.warn('assign feed',e); return {}; }
@@ -375,15 +380,17 @@ function genderOf(r){ const m=matchMaster(r.name);
 const splitOf=()=>50; // חלוקת בנים/בנות בבתי ספר מעורבים — הערכה של 50/50 לצורך התצוגה בלבד
 
 function linkAndBuild(){
-  CE=COURSES.map(c=>{
-    const a=ASSIGN_MAP[norm(c.name)];
-    if(!a) return {...c,key:c.name};
-    return {...c,key:c.name,
+  /* כל שורה בלשונית "שיבוץ קורסים" היא קבוצה נפרדת (אותו קורס יכול לרוץ כמה פעמים —
+     בנים/בנות, רצועות שונות, בית ספר ייעודי כמו פרדס חנה ברצועה 4). קורס בלי שורה נשאר כקורס בסיסי. */
+  CE=COURSES.flatMap(c=>{
+    const list=ASSIGN_MAP[norm(c.name)];
+    if(!list||!list.length) return [{...c,key:c.name}];
+    return list.map((a,i)=>({...c,key:c.name+'#'+i,
       gender:  a.gender  || c.gender,
       slots:  (a.slots&&a.slots.length) ? a.slots : c.slots,
       teacher: a.teacher || c.teacher,
       school:  a.school  || c.school,
-      status:  a.status  || c.status};
+      status:  a.status  || c.status}));
   });
 }
 const stripT=t=>t.replace(/[וי]/g,'').replace(/[אה]$/,'');
@@ -447,7 +454,7 @@ const waHref=p=>{let d=(p||'').replace(/[^\d]/g,'');
 function slotCards(D){
   return `<div class="slots">${D.map(d=>`
     <div class="slot">
-      <div class="slot-h"><b>${d.slot.label}</b><span><span class="ltr">${d.slot.time}</span> · ${d.n} בתי ספר</span></div>
+      <div class="slot-h"><b>${d.slot.label}</b><span><span class="ltr">${d.slot.time}</span>${dayOf(d.slot)} · ${d.n} בתי ספר</span></div>
       <div class="slot-b">
         <div class="gbox boys">
           <div class="row1"><span>בנים</span>
@@ -508,7 +515,7 @@ function assignCard(c){
     <div class="cname">${esc(c.name)}</div>
     <div class="sub">${esc(c.teacher)||'ללא מורה'}${c.field?' · '+esc(c.field):''}${bad?' · <b style="color:var(--warn)">בבירור</b>':''}</div>
     <div class="crow">
-      <span class="tag t-slot">${sl?esc(SLOTS[sl-1].label)+' · '+SLOTS[sl-1].time:'ללא רצועה'}</span>
+      <span class="tag t-slot">${sl?esc(SLOTS[sl-1].label)+' · '+SLOTS[sl-1].time+dayOf(SLOTS[sl-1]):'ללא רצועה'}</span>
       ${gn?gtag(gn):'<span class="tag t-warn">— מתחם —</span>'}
       <span class="tag">בית ספר: ${esc(sc)||'כלל בתי הספר ברצועה'}</span>
       <span class="tag">מקס׳ ${capOf(c)}</span>
@@ -537,7 +544,7 @@ function vAssign(){
     <div class="sub" style="margin-bottom:10px">${CE.length-pool.length} מתוך ${CE.length} קורסים משובצים במלואם (רצועה + מתחם). מוצג בדיוק כפי שהוא נכתב בגיליון.</div>
     <div class="aboard">${SLOTS.map(s=>`
       <div class="acol">
-        <div class="acolh"><b>${s.label}</b><span class="ltr">${s.time}</span></div>
+        <div class="acolh"><b>${s.label}</b><span><span class="ltr">${s.time}</span>${dayOf(s)}</span></div>
         ${assignCell(s.id,'בנים')}${assignCell(s.id,'בנות')}
         ${flex(s.id).length?`<div class="acell"><div class="ahead"><span>שניהם</span></div>${flex(s.id).map(assignCard).join('')}</div>`:''}
       </div>`).join('')}</div>
@@ -562,7 +569,7 @@ function vCourses(){
           <td class="num">${capOf(c)}</td></tr>`).join('')}</tbody></table>`
         :'<div class="empty">טרם הוגדרו קורסים</div>'}</div>`};
     const flexList=CE.filter(c=>c.slots.includes(s.id)&&!c.gender);
-    return `<div class="card"><h2>${s.label} <span class="sub ltr">${s.time}</span></h2>
+    return `<div class="card"><h2>${s.label} <span class="sub"><span class="ltr">${s.time}</span>${dayOf(s)}</span></h2>
       <div class="sub" style="margin-bottom:6px">בתי ספר ברצועה: ${esc(REGS.filter(r=>r.slots.includes(s.id)).map(r=>r.name).join(' · '))||'אין'}</div>
       <div class="grid2">${box('בנים',d.bNeed)}${box('בנות',d.gNeed)}</div>
       ${flexList.length?`<div class="sub" style="margin-top:9px">ללא שיוך למתחם: ${esc(flexList.map(c=>c.name).join(' · '))}</div>`:''}</div>`;
@@ -609,7 +616,7 @@ function vRoster(){
         <td class="num">${r.n}${r.unslotted?` <span class="tag t-warn" style="margin-inline-start:4px">+${r.unslotted} טרם שובצו</span>`:''}</td>
         <td class="num"><b>${r.hours}</b></td>
         <td>${(()=>{const ids=teacherSlots(r); return ids.length
-          ? ids.map(i=>`<span class="tag t-slot ltr">${SLOTS[i-1].time}</span>`).join('')
+          ? ids.map(i=>`<span class="tag t-slot"><span class="ltr">${SLOTS[i-1].time}</span>${dayOf(SLOTS[i-1])}</span>`).join('')
           : '<span class="sub">טרם שובץ</span>';})()}</td>
         <td>${r.t.status?`<span class="tag ${st(r.t.status)}">${esc(r.t.status)}</span>`:'<span class="sub">—</span>'}</td></tr>`).join('')}
       <tr style="background:var(--brand-soft)"><td colspan="3"><b>סה"כ</b></td>
