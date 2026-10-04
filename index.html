@@ -678,9 +678,10 @@ function vContacts(){
       </div>`).join('')}</div></div>`;
 }
 
-const TABS=[{k:'dash',n:'דשבורד'},{k:'assign',n:'לוח שיבוץ'},{k:'courses',n:'קורסים ובתי ספר'},
+/* לשונית "דשבורד" הוסרה מהתצוגה (4.10.2026) — בלבלה; הדף נפתח על לוח השיבוץ */
+const TABS=[{k:'assign',n:'לוח שיבוץ'},{k:'courses',n:'קורסים ובתי ספר'},
             {k:'roster',n:'מצבת מורים'},{k:'contacts',n:'אנשי קשר'}];
-let tab='dash';
+let tab='assign';
 (function(){const h=(location.hash||'').replace('#','').trim();
   if(h && TABS.some(t=>t.k===h)) tab=h;})();
 
@@ -689,7 +690,7 @@ function render(){
   const badge={courses:CE.length,assign:unslotted().length,roster:TEACHERS.length,contacts:TEACHERS.length+REGS.length};
   document.getElementById('nav').innerHTML=TABS.map(t=>
     `<button data-tab="${t.k}" class="${tab===t.k?'on':''}">${t.n}${badge[t.k]!==undefined?`<span class="b">${badge[t.k]}</span>`:''}</button>`).join('');
-  const v={dash:vDash,assign:vAssign,courses:vCourses,roster:vRoster,contacts:vContacts}[tab]||vDash;
+  const v={dash:vDash,assign:vAssign,courses:vCourses,roster:vRoster,contacts:vContacts}[tab]||vAssign;
   document.getElementById('view').innerHTML=v();
   const D=compute(),tot=D.reduce((a,d)=>a+d.bNeed+d.gNeed,0);
   document.getElementById('src').innerHTML=`סה"כ <b>${tot} קורסים</b> לפתוח · ${REGS.length} בתי ספר נרשמו · מסונכרן מגיליון ההרשמות (לצפייה בלבד)`;
