@@ -631,7 +631,7 @@ function vRoster(){
     <div class="scroll"><table class="tt">
       <thead><tr><th style="width:22%">מורה</th><th style="width:16%">תחום</th>
         <th style="width:9%">קבוצות</th><th style="width:11%">שעות אקדמיות</th>
-        <th style="width:20%">רצועות</th><th style="width:10%">סטטוס</th></tr></thead>
+        <th style="width:30%">רצועות</th></tr></thead>
       <tbody>${rows.map(r=>`<tr>
         <td><b>${esc(r.t.name)}</b></td>
         <td class="sub">${esc(r.t.field)||'—'}</td>
@@ -639,10 +639,9 @@ function vRoster(){
         <td class="num"><b>${r.hours}</b></td>
         <td>${(()=>{const ids=teacherSlots(r); return ids.length
           ? ids.map(i=>`<span class="tag t-slot"><span class="ltr">${SLOTS[i-1].time}</span>${dayOf(SLOTS[i-1])}</span>`).join('')
-          : '<span class="sub">טרם שובץ</span>';})()}</td>
-        <td>${r.t.status?`<span class="tag ${st(r.t.status)}">${esc(r.t.status)}</span>`:'<span class="sub">—</span>'}</td></tr>`).join('')}
+          : '<span class="sub">טרם שובץ</span>';})()}</td></tr>`).join('')}
       <tr style="background:var(--brand-soft)"><td colspan="2"><b>סה"כ</b></td>
-        <td class="num"><b>${totN}</b></td><td class="num"><b>${totH}</b></td><td colspan="2"></td></tr>
+        <td class="num"><b>${totN}</b></td><td class="num"><b>${totH}</b></td><td></td></tr>
       </tbody></table></div>
     <div class="sub" style="margin-top:6px">מקור: שיוך המורה לכל קורס בגיליון הקורסים · לוח השיבוץ קובע כמה מהקבוצות כבר שובצו לרצועה.</div>
   </div>`;
