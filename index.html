@@ -308,7 +308,7 @@ function buildData(T){
   if(T.teachers){const h=T.teachers.head,cN=Math.max(col(h,'שם המורה'),col(h,'שם פרטי')),
     cF=col(h,'תחום','מקצוע'),cG=col(h,'מתחם','מגדר'),cS=col(h,'רצוע'),cSc=col(h,'בית ספר'),
     cSt=col(h,'סטטוס'),cP=col(h,'טלפון'),cE=col(h,'מייל'),cHr=col(h,'שעות'),
-    cID=col(h,'תעודת זהות','ת.ז','תז');
+    cID=-1; /* תעודת זהות לא נקראת בדף הציבורי (4.10.2026) */
     TEACHERS=T.teachers.rows.filter(r=>r[cN]).map(r=>({name:r[cN],
       field:cF>=0?r[cF]||'':'',gender:genFrom(cG>=0?r[cG]:'')||'',slots:cS>=0?slotsFrom(r[cS]):[],
       school:cSc>=0?r[cSc]||'':'',status:cSt>=0?r[cSt]||'':'',
@@ -629,12 +629,11 @@ function vRoster(){
     <div class="sub" style="margin-bottom:11px">כל קבוצה/מחזור נספרת כרצועה אחת (${HPG} שעות אקדמיות). ${TEACHERS.length} מורים ·
       <b>${totN} קבוצות</b> · <b>${totH} שעות אקדמיות</b> סה"כ.</div>
     <div class="scroll"><table class="tt">
-      <thead><tr><th style="width:18%">מורה</th><th style="width:13%">ת.ז.</th><th style="width:12%">תחום</th>
+      <thead><tr><th style="width:22%">מורה</th><th style="width:16%">תחום</th>
         <th style="width:9%">קבוצות</th><th style="width:11%">שעות אקדמיות</th>
         <th style="width:20%">רצועות</th><th style="width:10%">סטטוס</th></tr></thead>
       <tbody>${rows.map(r=>`<tr>
         <td><b>${esc(r.t.name)}</b></td>
-        <td class="ltr">${esc(r.t.idNum)||'—'}</td>
         <td class="sub">${esc(r.t.field)||'—'}</td>
         <td class="num">${r.n}${r.unslotted?` <span class="tag t-warn" style="margin-inline-start:4px">+${r.unslotted} טרם שובצו</span>`:''}</td>
         <td class="num"><b>${r.hours}</b></td>
@@ -642,7 +641,7 @@ function vRoster(){
           ? ids.map(i=>`<span class="tag t-slot"><span class="ltr">${SLOTS[i-1].time}</span>${dayOf(SLOTS[i-1])}</span>`).join('')
           : '<span class="sub">טרם שובץ</span>';})()}</td>
         <td>${r.t.status?`<span class="tag ${st(r.t.status)}">${esc(r.t.status)}</span>`:'<span class="sub">—</span>'}</td></tr>`).join('')}
-      <tr style="background:var(--brand-soft)"><td colspan="3"><b>סה"כ</b></td>
+      <tr style="background:var(--brand-soft)"><td colspan="2"><b>סה"כ</b></td>
         <td class="num"><b>${totN}</b></td><td class="num"><b>${totH}</b></td><td colspan="2"></td></tr>
       </tbody></table></div>
     <div class="sub" style="margin-top:6px">מקור: שיוך המורה לכל קורס בגיליון הקורסים · לוח השיבוץ קובע כמה מהקבוצות כבר שובצו לרצועה.</div>
