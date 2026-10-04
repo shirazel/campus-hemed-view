@@ -648,6 +648,18 @@ function vRoster(){
     <div class="sub" style="margin-top:6px">מקור: שיוך המורה לכל קורס בגיליון הקורסים · לוח השיבוץ קובע כמה מהקבוצות כבר שובצו לרצועה.</div>
   </div>`;
 }
+/* ---------- לו"ז (תצוגה בלבד, מלוח השנה בגיליון) ---------- */
+function vSchedule(){
+  const today=new Date().toISOString().slice(0,10);
+  const evs=[...SHEET_EVS].sort((a,b)=>(a.d||'9999').localeCompare(b.d||'9999'));
+  const fmt=d=>{const m=/^(\d{4})-(\d{2})-(\d{2})/.exec(d||''); return m?m[3]+'.'+m[2]+'.'+m[1]:(d||'ללא תאריך');};
+  return `<div class="card"><h2>לו"ז שנתי וימי היערכות</h2>
+    <div class="sub" style="margin-bottom:10px">אירועים מיוחדים מלוח השנה של הקמפוס (שיעורים שוטפים אינם מוצגים). אירועים שעברו מעומעמים.</div>
+    <div>${evs.map(e=>`<div class="ev" style="${e.d&&e.d<today?'opacity:.5':''}">
+      <div class="t">${esc(e.t)} ${e.c?`<span class="tag t-slot">${esc(e.c)}</span>`:''}</div>
+      <div class="d"><span class="ltr">${esc(fmt(e.d))}</span>${e.h?' · <span class="ltr">'+esc(e.h)+'</span>':''}${e.l?' · '+esc(e.l):''}</div>
+    </div>`).join('')||'<div class="empty">אין אירועים</div>'}</div></div>`;
+}
 /* ---------- אנשי קשר ---------- */
 function contactRow(name,role,phone,mail,tag){
   const ok=/^[\d\s\-+()]{7,}$/.test(phone||'');
@@ -704,17 +716,17 @@ function vContacts(){
 
 /* לשונית "דשבורד" הוסרה מהתצוגה (4.10.2026) — בלבלה; הדף נפתח על לוח השיבוץ */
 const TABS=[{k:'assign',n:'לוח שיבוץ'},{k:'courses',n:'קורסים ובתי ספר'},
-            {k:'roster',n:'מצבת מורים'},{k:'contacts',n:'אנשי קשר'}];
+            {k:'roster',n:'מצבת מורים'},{k:'sched',n:'לו"ז'},{k:'contacts',n:'אנשי קשר'}];
 let tab='assign';
 (function(){const h=(location.hash||'').replace('#','').trim();
   if(h && TABS.some(t=>t.k===h)) tab=h;})();
 
 function render(){
   try{ if(('#'+tab)!==location.hash) history.replaceState(null,'','#'+tab); }catch(e){}
-  const badge={courses:CE.length,assign:unslotted().length,roster:TEACHERS.length,contacts:TEAM.length+TEACHERS.length+REGS.length};
+  const badge={courses:CE.length,assign:unslotted().length,roster:TEACHERS.length,sched:SHEET_EVS.length,contacts:TEAM.length+TEACHERS.length+REGS.length};
   document.getElementById('nav').innerHTML=TABS.map(t=>
     `<button data-tab="${t.k}" class="${tab===t.k?'on':''}">${t.n}${badge[t.k]!==undefined?`<span class="b">${badge[t.k]}</span>`:''}</button>`).join('');
-  const v={dash:vDash,assign:vAssign,courses:vCourses,roster:vRoster,contacts:vContacts}[tab]||vAssign;
+  const v={dash:vDash,assign:vAssign,courses:vCourses,roster:vRoster,sched:vSchedule,contacts:vContacts}[tab]||vAssign;
   document.getElementById('view').innerHTML=v();
   const D=compute(),tot=D.reduce((a,d)=>a+d.bNeed+d.gNeed,0);
   document.getElementById('src').innerHTML=`סה"כ <b>${tot} קורסים</b> לפתוח · ${REGS.length} בתי ספר נרשמו · מסונכרן מגיליון ההרשמות (לצפייה בלבד)`;
