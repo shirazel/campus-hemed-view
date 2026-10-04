@@ -392,6 +392,13 @@ function linkAndBuild(){
       school:  a.school  || c.school,
       status:  a.status  || c.status}));
   });
+  /* בית ספר שהקורס שלו שובץ לרצועה 4 (יום רביעי) — נספר שם ולא ברצועה שבה נרשם בטופס
+     (פרדס חנה נרשמה לשלישי 14:00, והועברה לרביעי). אצל שירה ההזזה נשמרת מקומית בלבד,
+     לכן כאן היא נגזרת מהשיבוץ בגיליון. */
+  CE.filter(c=>(c.slots||[]).includes(4)&&c.school).forEach(c=>{
+    const reg=REGS.find(r=>ALIASES[r.name]&&c.school.includes(ALIASES[r.name]));
+    if(reg) reg.slots=[4];
+  });
 }
 const stripT=t=>t.replace(/[וי]/g,'').replace(/[אה]$/,'');
 const tokEq=(x,y)=>{const a=stripT(x),b=stripT(y);
