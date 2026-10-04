@@ -584,11 +584,11 @@ function vCourses(){
     const box=(g,need)=>{const list=inSlot(g), sch=schoolsIn(s.id,g);
       return `<div><h3>${g} — ${list.length} מתוך ${need} נדרשים
         ${list.length<need?`<span class="tag t-bad">חסרים ${need-list.length}</span>`:'<span class="tag t-ok">מלא</span>'}</h3>
-        <div class="aschools" style="margin-bottom:8px"><span class="sub">בתי ספר שלומדים כאן:</span> ${sch.map(o=>`<span class="stag">${esc(o.name)} <b>${o.n}</b>${o.mixed?' <i>מעורב</i>':''}</span>`).join('')||'<span class="stag">אין בתי ספר</span>'}</div>
-        ${list.length?`<table><thead><tr><th>קורס</th><th>מורה</th><th>שיוך לבית ספר</th><th>מקס׳</th></tr></thead>
+
+        ${list.length?`<table><thead><tr><th>קורס</th><th>מורה</th><th>בתי ספר</th><th>מקס׳</th></tr></thead>
         <tbody>${list.map(c=>`<tr><td><b>${esc(c.name)}</b><div class="sub">${esc(c.field)}</div></td>
           <td>${c.teacher?esc(c.teacher):'<span class="tag t-bad">לא שובץ</span>'}</td>
-          <td class="sub">${esc(curSchool(c))||'כל בתי הספר שלמעלה'}</td>
+          <td class="sub">${curSchool(c)?esc(curSchool(c)):(sch.length?esc(sch.map(o=>o.name+' ('+o.n+')').join(' · ')):'—')}</td>
           <td class="num">${capOf(c)}</td></tr>`).join('')}</tbody></table>`
         :'<div class="empty">טרם הוגדרו קורסים</div>'}</div>`};
     const flexList=CE.filter(c=>c.slots.includes(s.id)&&!c.gender);
@@ -610,6 +610,7 @@ const HPG=2; // שעות אקדמיות לקבוצה
 function teacherHours(){
   return TEACHERS.map(t=>{
     const cs=CE.filter(x=>x.teacher&&nameMatch(t.name,x.teacher));
+    if(!t.field){ const fs=[...new Set(cs.map(x=>x.field).filter(Boolean))]; if(fs.length) t.field=fs.join(' · '); }
     const slotted=cs.filter(x=>curSlot(x));
     return {t, courses:slotted, n:slotted.length, unslotted:cs.length-slotted.length, hours:slotted.length*HPG};
   }).sort((a,b)=>b.hours-a.hours||a.t.name.localeCompare(b.t.name,'he'));
