@@ -756,25 +756,46 @@ async function fetchLive(){
   let lz=null; try{ lz=toPipe(await getRows('luz')); }catch(e){ console.warn('luz feed',e); }
   return {main,luz:lz,at:new Date().toISOString()};
 }
-async function boot(){
-  document.getElementById('err').innerHTML='';
-  document.getElementById('btnSync').textContent='מרענן…'; document.getElementById('btnSync').disabled=true;
+let __busy=false, __last=0, __auto=null;
+/* quiet===true: רענון אוטומטי ברקע — בלי הבהוב, בלי לאבד גלילה/חיפוש, ובלי למחוק נתונים אם קריאה נכשלה */
+async function boot(quiet){
+  quiet=(quiet===true);
+  if(__busy) return; __busy=true;
+  const btn=document.getElementById('btnSync');
+  if(!quiet){ document.getElementById('err').innerHTML=''; btn.textContent='מרענן…'; btn.disabled=true; }
   try{
     const d=await fetchLive();
     buildData(parseSheet(d.main));
+    const prevA=ASSIGN_MAP, prevT=TEAM;
     ASSIGN_MAP=await getAssignMap();
     TEAM=await getTeam();
+    if(quiet){
+      if(!Object.keys(ASSIGN_MAP).length && Object.keys(prevA).length) ASSIGN_MAP=prevA;
+      if(!TEAM.length && prevT.length) TEAM=prevT;
+    }
     if(d.luz){ const g=parseLuzGrid(d.luz); if(g.length) SHEET_EVS=g; }
     linkAndBuild();
-    bar('live','<b>מחובר לגיליון.</b> הנתונים נטענו ישירות מהגיליון · עודכן: '+fmtAt(d.at)+'.');
+    bar('live','<b>מחובר לגיליון.</b> הנתונים נטענו ישירות מהגיליון · עודכן: '+fmtAt(d.at)+'. מתעדכן אוטומטית כל כמה דקות.');
+    const y=window.scrollY, q=(document.getElementById('ccSearch')||{}).value;
     render();
+    const cs=document.getElementById('ccSearch');
+    if(quiet&&cs&&q){ cs.value=q; cs.dispatchEvent(new Event('input')); }
+    if(quiet) window.scrollTo(0,y);
+    __last=Date.now();
   }catch(e){
     console.warn('live load failed',e);
-    bar('bad','<b>לא הצלחתי להתחבר לגיליון כרגע</b> ('+esc(e.message)+'). רעני את הדף בעוד רגע — הדף הזה תמיד קורא נתונים חיים ואינו שומר עותק מקומי.');
+    if(!quiet) bar('bad','<b>לא הצלחתי להתחבר לגיליון כרגע</b> ('+esc(e.message)+'). רעני את הדף בעוד רגע — הדף הזה תמיד קורא נתונים חיים ואינו שומר עותק מקומי.');
   }
-  const b=document.getElementById('btnSync'); b.textContent='🔄 רענון מהגיליון'; b.disabled=false;
+  if(!quiet){ btn.textContent='🔄 רענון מהגיליון'; btn.disabled=false; }
+  __busy=false; startAuto();
 }
-document.getElementById('btnSync').onclick=boot;
+function startAuto(){
+  if(__auto) return;
+  __auto=setInterval(()=>{ if(document.visibilityState==='visible') boot(true); },120000);   // כל 2 דקות
+  document.addEventListener('visibilitychange',()=>{
+    if(document.visibilityState==='visible' && Date.now()-__last>60000) boot(true); });     // חזרה ללשונית
+}
+document.getElementById('btnSync').onclick=()=>boot(false);
 /* ---------- שער סיסמה (4.10.2026) ----------
    הדף לא טוען שום נתון מהגיליון עד שמקלידים סיסמה. זה שער נגד כניסה מקרית,
    לא הגנה חזקה: הסיסמה נבדקת בדפדפן (נשמרת רק ה-hash שלה בקוד). */
