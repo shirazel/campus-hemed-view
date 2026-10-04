@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Cpath%20d%3D%22M27%2046q5%2013%2010%200-5%204-10%200z%22%20fill%3D%22%23f5a623%22%2F%3E%3Cpath%20d%3D%22M29%2047q3%208%206%200-3%202-6%200z%22%20fill%3D%22%23f7d774%22%2F%3E%3Cpath%20d%3D%22M18%2032q-8%206-7%2016%205-2%209-6z%22%20fill%3D%22%232b3577%22%2F%3E%3Cpath%20d%3D%22M46%2032q8%206%207%2016-5-2-9-6z%22%20fill%3D%22%232b3577%22%2F%3E%3Cpath%20d%3D%22M32%203c9%2010%2013%2023%2013%2036v6H19v-6C19%2026%2023%2013%2032%203z%22%20fill%3D%22%233b4a9e%22%2F%3E%3Cpath%20d%3D%22M32%203c5%2010%207%2023%207%2036v6h-6v-6C33%2026%2032%2013%2032%203z%22%20fill%3D%22%234d5fc4%22%20opacity%3D%22.7%22%2F%3E%3Ccircle%20cx%3D%2232%22%20cy%3D%2224%22%20r%3D%226%22%20fill%3D%22%23eef1fc%22%2F%3E%3Ccircle%20cx%3D%2232%22%20cy%3D%2224%22%20r%3D%223.4%22%20fill%3D%22%237f93e8%22%2F%3E%3Crect%20x%3D%2219%22%20y%3D%2243%22%20width%3D%2226%22%20height%3D%225%22%20rx%3D%222.2%22%20fill%3D%22%232b3577%22%2F%3E%3C%2Fsvg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+<title>🚀 קמפוס חמ"ד — דף צפייה לצוות הניהול</title>
+<style>
+:root{
+  color-scheme: light;
+  --bg:#f5f6fb; --card:#fff; --ink:#1e2338; --muted:#6b7390;
+  --line:#e4e7f0; --brand:#3b4a9e; --brand-soft:#eef1fc;
+  --boy:#1e5f96; --boy-soft:#e8f1fb; --boy-line:#cfe1f4;
+  --girl:#a8356e; --girl-soft:#fbeaf3; --girl-line:#f3d3e4;
+  --mix:#6b4ba8; --mix-soft:#f1ecfa;
+  --ok:#0f8a5f; --ok-soft:#e6f6ef; --warn:#b45309; --warn-soft:#fdf3e3;
+  --bad:#c0392b; --bad-soft:#fdecea;
+}
+*{box-sizing:border-box}
+body,button,input,select,table,th,td{font-family:'Open Sans','Segoe UI',Arial,Helvetica,sans-serif}
+body{margin:0;background:var(--bg);color:var(--ink);font-size:14px;line-height:1.5}
+.wrap{max-width:1200px;margin:0 auto;padding:18px 16px 40px}
+h1{font-size:20px;margin:0 0 2px;font-weight:800}
+h2{font-size:16px;margin:0 0 4px;font-weight:700}
+h3{font-size:13.5px;margin:16px 0 7px;font-weight:700;color:var(--brand)}
+.sub{color:var(--muted);font-size:12.5px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
+.ltr{direction:ltr;unicode-bidi:isolate;display:inline-block}
+.topbar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
+.lockline{font-size:11.5px;color:var(--warn);background:var(--warn-soft);border-radius:8px;padding:5px 10px;display:inline-block;margin-top:6px}
+nav{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0 14px}
+nav button{border:1px solid var(--line);background:#fff;color:var(--muted);font-family:inherit;font-size:13px;
+  font-weight:700;padding:8px 14px;border-radius:10px;cursor:pointer}
+nav button.on{background:var(--brand);color:#fff;border-color:var(--brand)}
+nav button .b{background:rgba(0,0,0,.08);border-radius:99px;padding:0 6px;margin-inline-start:5px;font-size:11px}
+nav button.on .b{background:rgba(255,255,255,.22)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:13px 15px}
+.kpi .v{font-size:27px;font-weight:800;line-height:1.1;color:var(--brand)}
+.kpi .l{font-size:12px;color:var(--muted);margin-top:2px}
+.kpi.alert .v{color:var(--bad)} .kpi.good .v{color:var(--ok)}
+.slots{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:13px}
+.slot{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--card)}
+.slot-h{background:var(--brand);color:#fff;padding:10px 14px;display:flex;justify-content:space-between;align-items:baseline}
+.slot-h b{font-size:15px} .slot-h span{font-size:12px;opacity:.85}
+.slot-b{padding:13px;display:grid;gap:9px}
+.gbox{border-radius:11px;padding:10px 12px;border:1px solid var(--line)}
+.gbox.boys{background:var(--boy-soft);border-color:var(--boy-line)}
+.gbox.girls{background:var(--girl-soft);border-color:var(--girl-line)}
+.gbox .row1{display:flex;justify-content:space-between;align-items:baseline;font-weight:700}
+.gbox.boys .row1{color:var(--boy)} .gbox.girls .row1{color:var(--girl)}
+.big{font-size:32px;font-weight:800;line-height:1;letter-spacing:-1px}
+.bignum{display:flex;align-items:baseline;gap:5px}
+.bignum i{font-style:normal;font-size:11px;font-weight:700;opacity:.75}
+.cpill{display:inline-block;background:#fff;border-radius:99px;padding:2px 10px;
+  font-weight:800;font-size:12px;border:1.5px solid currentColor}
+.cpill.boys{color:var(--boy)} .cpill.girls{color:var(--girl)}
+.cpill2{display:inline-block;background:rgba(255,255,255,.7);border:1px solid rgba(0,0,0,.08);
+  border-radius:99px;padding:2px 9px;font-size:11.5px;color:var(--muted);margin-inline-start:4px}
+.cpill2.bad{color:var(--bad);border-color:#f2c7c1;font-weight:700}
+.schools{font-size:11px;color:var(--muted);margin-top:6px;padding-top:6px;border-top:1px dashed rgba(0,0,0,.13)}
+.tot{display:flex;justify-content:space-between;background:var(--brand-soft);border-radius:9px;padding:7px 12px;font-size:12.5px;font-weight:700;color:var(--brand)}
+table{width:100%;border-collapse:collapse;font-size:12.7px}
+th,td{padding:8px 9px;text-align:right;border-bottom:1px solid var(--line);vertical-align:middle}
+th{background:#f2f4fa;color:var(--muted);font-size:11.5px;font-weight:700}
+tbody tr:hover{background:#fafbff}
+.tag{display:inline-block;padding:2px 9px;border-radius:99px;font-size:11.5px;font-weight:700;white-space:nowrap;margin:1px}
+.t-boy{background:var(--boy-soft);color:var(--boy)} .t-girl{background:var(--girl-soft);color:var(--girl)}
+.t-mix{background:var(--mix-soft);color:var(--mix)} .t-slot{background:var(--brand-soft);color:var(--brand)}
+.t-ok{background:var(--ok-soft);color:var(--ok)} .t-warn{background:var(--warn-soft);color:var(--warn)}
+.t-bad{background:var(--bad-soft);color:var(--bad)}
+.num{font-variant-numeric:tabular-nums;font-weight:700}
+input[type=text]{border:1px solid var(--line);border-radius:7px;padding:6px 9px;font-size:12.5px;font-family:inherit;background:#fff;color:inherit}
+.scroll{max-height:560px;overflow:auto;border:1px solid var(--line);border-radius:11px}
+.empty{color:var(--muted);padding:18px;text-align:center}
+.btn{border:1px solid var(--brand);background:var(--brand);color:#fff;font-family:inherit;font-size:12.5px;font-weight:700;
+  padding:6px 13px;border-radius:9px;cursor:pointer}
+.btn.ghost{background:#fff;color:var(--brand)}
+.btn.mini{padding:3px 9px;font-size:11.5px}
+.ev{position:relative;padding:10px 0 10px 0;border-bottom:1px dashed var(--line)}
+.ev:last-child{border-bottom:0}
+.ev .d{font-size:11.5px;color:var(--muted)} .ev .t{font-weight:700}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:13px}
+.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:11px}
+.ccard2{border:1px solid var(--line);border-radius:11px;padding:11px 13px;background:#fff}
+.ccard2.school{border-inline-start:4px solid var(--brand)}
+.cc-head{display:flex;justify-content:space-between;align-items:center;gap:6px;margin-bottom:3px}
+.cc-head b{font-size:13.5px}
+.cc-line{font-size:12px;margin-top:6px;padding-top:6px;border-top:1px dashed var(--line)}
+.crole{color:var(--muted);font-size:11px;background:#f4f6fc;border-radius:6px;padding:1px 6px;margin-inline-end:5px}
+.cc{margin-top:7px;padding-top:7px;border-top:1px dashed var(--line)}
+.cc-main b{font-size:12.5px}
+.cc-links{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px}
+.cbtn{display:inline-block;font-size:11.5px;text-decoration:none;background:var(--brand-soft);
+  color:var(--brand);border:1px solid #d7deef;border-radius:7px;padding:3px 9px;font-weight:700}
+.cbtn:hover{background:#e3e8fa}
+.cbtn.wa{background:var(--ok-soft);color:var(--ok);border-color:#bfe6d4}
+/* ---- לוח שיבוץ (תצוגה בלבד) ---- */
+.aboard{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+.acol{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fbfcff}
+.acolh{background:var(--brand);color:#fff;padding:9px 12px;display:flex;justify-content:space-between;align-items:baseline;font-size:13px}
+.acolh span{opacity:.85;font-size:12px}
+.acell{padding:9px;border-bottom:1px solid var(--line)}
+.acell:last-child{border-bottom:0}
+.acell.boys{background:var(--boy-soft)} .acell.girls{background:var(--girl-soft)}
+.ahead{display:flex;justify-content:space-between;align-items:center;font-weight:700;font-size:12.5px;margin-bottom:7px}
+.acell.boys .ahead>span:first-child{color:var(--boy)} .acell.girls .ahead>span:first-child{color:var(--girl)}
+.aempty{font-size:11.5px;color:var(--muted);text-align:center;padding:8px;border:1px dashed var(--line);border-radius:8px;background:rgba(255,255,255,.5)}
+.ccard{background:#fff;border:1px solid var(--line);border-radius:9px;padding:8px 10px;margin-bottom:7px}
+.ccard.q{border-inline-start:3px solid var(--warn)}
+.ccard .cname{font-weight:700;font-size:12.5px;line-height:1.3}
+.ccard .crow{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px}
+.aschools{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px}
+.stag{background:rgba(255,255,255,.75);border:1px solid rgba(0,0,0,.07);border-radius:7px;
+  padding:2px 7px;font-size:10.5px;color:var(--muted)}
+.stag b{color:var(--ink)} .stag i{font-style:normal;opacity:.65;font-size:9.5px}
+.apool{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:9px}
+.tt td{vertical-align:top}
+.signature{direction:rtl;text-align:center;font-size:12px;line-height:1.8;padding:18px 12px;margin-top:8px;opacity:.72;color:var(--muted);border-top:1px solid var(--line)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="card topbar">
+    <div>
+      <h1>קמפוס חמ"ד — דף צפייה לצוות הניהול</h1>
+      <div class="sub" id="src">טוען נתונים מגיליון ההרשמות…</div>
+      <div class="lockline">🔒 דף פנימי לצוות הניהול בלבד — כולל פרטי קשר של מורים. אין להפיץ הלאה בלי אישור.</div>
+    </div>
+    <button class="btn ghost" id="btnSync">🔄 רענון מהגיליון</button>
+  </div>
+
+  <div id="err"></div>
+  <div id="offbar"></div>
+  <nav id="nav"></nav>
+  <div id="view"></div>
+
+  <footer class="signature">
+    <span class="sig-name">קמפוס חמ"ד מחוז חיפה — למידה שפוגשת את התשוקה לדעת</span>
+  </footer>
+</div>
+
+<script>
+/* =====================================================================
+   דף צפייה בלבד לצוות הניהול — קמפוס חמ"ד תשפ"ז
+   נגזר מ-index-מקומי.html ב-17.9.2026, עודכן שוב באותו יום כדי שהלשוניות
+   והמראה יתאימו בדיוק ללוח הניהול המקומי: דשבורד, לוח שיבוץ (אותו לוח
+   ויזואלי בדיוק — עמודות לפי רצועה, תאים לפי מגדר, כרטיסי קורס), קורסים
+   ובתי ספר, מצבת מורים (שעות), אנשי קשר. ההבדל היחיד מהמערכת המקומית:
+   כל הבקרות (סלקטים/כפתורי עריכה/סנכרון) הוסרו — זהו עמוד קריאה בלבד,
+   שקורא ישירות מהגיליון בכל טעינה ולעולם לא כותב אליו.
+   ===================================================================== */
+const FILE_ID='1a7xr86kil66yseNre1cHpFNPj3UYdmY7Zb3arvDh_X8';
+const LUZ_ID='1InhH9b560aPLX2TE5zbXo21Qf6ZjuijQ1H1F_9e_mSI';
+const LUZ_URL='https://docs.google.com/spreadsheets/d/'+LUZ_ID+'/edit';
+const GS=20; // גודל קבוצה מרבי — לתצוגה בלבד, תואם את ברירת המחדל במערכת הניהול
+function GVIZOF(key){
+  return {
+    regs:    {id:FILE_ID, sheet:'תגובות לטופס 1'},
+    teachers:{id:FILE_ID, sheet:'מורים-לפרסום'},
+    courses: {id:FILE_ID, gid:'241967168'},
+    master:  {id:FILE_ID, gid:'611332690'},
+    assign:  {id:FILE_ID, sheet:'שיבוץ קורסים'},
+    luz:     {id:LUZ_ID,  gid:'684316836'}
+  }[key];
+}
+let __jsonpN=0;
+function jsonpTable(g,headers){
+  return new Promise((resolve,reject)=>{
+    const cb='chemedViewCB'+(__jsonpN++)+'_'+Date.now();
+    const timer=setTimeout(()=>{cleanup();reject(new Error('פסק זמן בתגובה מגוגל'))},15000);
+    function cleanup(){ try{delete window[cb]}catch(e){window[cb]=undefined}
+      const el=document.getElementById(cb); if(el)el.remove(); clearTimeout(timer); }
+    window[cb]=function(resp){ cleanup();
+      if(!resp||resp.status==='error'){
+        reject(new Error((resp&&resp.errors&&resp.errors[0]&&resp.errors[0].detailed_message)||'שגיאה בקריאת הגיליון'));
+        return;}
+      resolve(resp.table); };
+    let src='https://docs.google.com/spreadsheets/d/'+g.id+'/gviz/tq?';
+    src+= g.gid!=null ? 'gid='+g.gid : 'sheet='+encodeURIComponent(g.sheet);
+    if(g.tq) src+='&tq='+encodeURIComponent(g.tq);
+    src+='&headers='+headers+'&tqx=out:json;responseHandler:'+cb;
+    const s=document.createElement('script'); s.id=cb; s.src=src;
+    s.onerror=()=>{cleanup();reject(new Error('שגיאת רשת בטעינת הגיליון'))};
+    document.head.appendChild(s);
+  });
+}
+function cellVal(c){ if(!c) return ''; if(c.f!=null) return String(c.f); if(c.v==null) return ''; return String(c.v); }
+function tableRows(table, useLabels){
+  const data=((table&&table.rows)||[]).map(r=>(r.c||[]).map(cellVal));
+  const rows = useLabels ? [((table&&table.cols)||[]).map(c=>c.label||''), ...data] : data;
+  return rows;
+}
+async function getRows(key){
+  const g=GVIZOF(key), useLabels=key!=='luz';
+  return tableRows(await jsonpTable(g, useLabels?1:0), useLabels);
+}
+
+const esc=s=>(s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const norm=s=>(s||'').replace(/["'`״׳()]/g,'').replace(/[\-–—]/g,' ').replace(/\s+/g,' ').trim();
+const col=(h,...names)=>{for(const n of names){const i=h.findIndex(c=>c.includes(n));if(i>=0)return i}return -1};
+
+const SLOTS=[{id:1,label:'רצועה 1',time:'09:30–11:00',keys:['9:30','9:00']},
+             {id:2,label:'רצועה 2',time:'11:10–12:40',keys:['11:10']},
+             {id:3,label:'רצועה 3',time:'14:00–15:30',keys:['14:00']}];
+const slotsFrom=txt=>SLOTS.filter(s=>s.keys.some(k=>(txt||'').includes(k))).map(s=>s.id);
+const genFrom=txt=>{const n=norm(txt);
+  if(/שניהם|מעורב|בנים ובנות/.test(n))return'מעורב';
+  if(/בנות/.test(n))return'בנות'; if(/בנים/.test(n))return'בנים'; return''};
+
+const ALIASES={'נתיבות דרור':'נתיבות דרור','אולפנת אמית חיפה':'אמית חיפה','פלך זכרון יעקב':'תיכון פלך',
+ 'לוינסון':'לוינסון','שש שנתי ישי':'שש שנתי ישי','ישיבה תיכונית קרית אתא':'קרית אתא','דרכא אריאל':'דרכא אריאל',
+ 'יבע חריש':'בני עקיבא חריש','אולפנית שחם':'שחם','יבע עירוני יבנה חיפה':'בני עקיבא יבנה',
+ 'ישיבה תיכונית זכרון יעקב':'תנכית זכרון יעקב','ישיבת בני עקיבא חדרה':'בני עקיבא חדרה',
+ 'אולפנת סגולה':'סגולה','אולפנית אמונה אלישבע':'אמונה אלישבע','אולפנית אמית שחר אור עקיבא':'אמית שחר',
+ 'אולפנת צביה חיפה':'צביה חיפה','ישיבת צביה פרדס חנה':'פרדס חנה','עירוני ב':'פרחי אהרון'};
+
+let REGS=[],MASTER=[],TEACHERS=[],COURSES=[],SHEET_EVS=[],CE=[],ASSIGN_MAP={};
+
+/* ---------- שיוך בפועל מלוח השיבוץ (תוקן 22.9.2026) ---------------------
+   לשונית "קורסים תשפ\"ז" (courses, gid קבוע) היא הקטלוג ה*בסיסי* של
+   הקורסים — היא כמעט אף פעם לא מכילה רצועה/בית ספר, כי אלה נקבעים בפועל
+   בלוח השיבוץ (index-מקומי.html) ונשמרים שם רק בדפדפן של שירה (localStorage),
+   לא בגיליון. הכפתור "☁️ סנכרון לגיליון" כותב את השיבוץ בפועל ללשונית
+   נפרדת — "שיבוץ קורסים" — ולא ללשונית הבסיסית. הדף הזה קרא עד עכשיו רק
+   את הלשונית הבסיסית, ולכן תמיד הציג את כל הקורסים כ"לא משובצים", גם
+   כשהשיבוץ בפועל כן סונכרן בהצלחה. התיקון: קוראים גם את "שיבוץ קורסים"
+   ומשכבים (overlay) את הערכים שלה — רצועה/מתחם/מורה/בית ספר/סטטוס — מעל
+   הקטלוג הבסיסי, לפי שם קורס, בדיוק כמו שמערכת הניהול עצמה עושה מקומית. */
+async function getAssignMap(){
+  try{
+    const rows=await getRows('assign');
+    if(!rows||rows.length<2) return {};
+    const h=rows[0];
+    const cN=col(h,'שם הקורס'),cG=col(h,'מתחם','מגדר'),cS=col(h,'רצוע'),
+          cT=col(h,'מורה'),cSc=col(h,'בית ספר'),cSt=col(h,'סטטוס');
+    const map={};
+    rows.slice(1).forEach(r=>{
+      if(!r[cN]) return;
+      map[norm(r[cN])]={
+        gender: cG>=0?(genFrom(r[cG])||''):'',
+        slots:  cS>=0?slotsFrom(r[cS]):[],
+        teacher:cT>=0?(r[cT]||''):'',
+        school: cSc>=0?(r[cSc]||''):'',
+        status: cSt>=0?(r[cSt]||''):''
+      };
+    });
+    return map;
+  }catch(e){ console.warn('assign feed',e); return {}; }
+}
+
+const HEADS=[
+ {k:'regs',   test:r=>r.includes('שם בית הספר')},
+ {k:'master', test:r=>r[0]==='שם מוסד מלא רשמי'},
+ {k:'teachers',test:r=>r.some(c=>/^שם המורה|^שם פרטי/.test(c))},
+ {k:'courses',test:r=>r.some(c=>/^שם הקורס/.test(c))},
+ {k:'events', test:r=>r.some(c=>/^שם האירוע/.test(c))}
+];
+function parseSheet(text){
+  const rows=text.split('\n').map(l=>l.trim()).filter(l=>l.startsWith('|'))
+    .map(l=>l.replace(/^\|/,'').replace(/\|$/,'').split('|').map(c=>c.trim().replace(/\\/g,'')))
+    .filter(r=>!r.every(c=>/^:?-+:?$/.test(c)||c===''));
+  const found=[];
+  rows.forEach((r,i)=>{ const h=HEADS.find(h=>h.test(r)); if(h && !found.some(f=>f.k===h.k)) found.push({k:h.k,i,head:r}); });
+  found.sort((a,b)=>a.i-b.i);
+  const out={};
+  found.forEach((f,n)=>{ const end=n+1<found.length?found[n+1].i:rows.length;
+    out[f.k]={head:f.head,rows:rows.slice(f.i+1,end).filter(r=>r.some(c=>c))}; });
+  return out;
+}
+const toPipe=rows=>rows.map(r=>'| '+r.map(c=>String(c==null?'':c).replace(/\s+/g,' ').replace(/\|/g,'/').trim()).join(' | ')+' |').join('\n');
+
+function buildData(T){
+  if(T.regs){const h=T.regs.head,cN=col(h,'שם בית הספר'),cS=col(h,'זמני הלמידה'),
+    cU=col(h,'מספר התלמידים'),cC=col(h,'הכיתות'),cW=col(h,'שם ממלא'),cB=col(h,'בקשות'),
+    cL=col(h,'שם המוביל'),cLP=col(h,'טלפון המוביל'),cLE=col(h,'אימייל של המוביל'),
+    cT=col(h,'שם רכז התקשוב'),cTP=col(h,'טלפון רכז התקשוב'),cKit=col(h,'כמות ערכות');
+    const g=(r,i)=>i>=0?(r[i]||''):'';
+    REGS=T.regs.rows.filter(r=>r[cN]).map(r=>({name:r[cN],who:g(r,cW),classes:g(r,cC),
+      students:parseInt((r[cU]||'').replace(/[^\d]/g,''))||0,slots:slotsFrom(r[cS]),note:g(r,cB),
+      lead:g(r,cL),leadPhone:g(r,cLP),leadMail:g(r,cLE),
+      tech:g(r,cT),techPhone:g(r,cTP),kits:g(r,cKit)}));}
+  if(T.master){MASTER=[];T.master.rows.forEach(r=>{
+      if(r[0]&&r[0]!=='שם מוסד מלא רשמי'&&!MASTER.some(m=>m.name===r[0]))
+      MASTER.push({name:r[0],city:r[1]||'',gender:r[2]||'',type:r[3]||'',
+        joins:!/^\s*לא\s*$/.test(String(r[4]==null?'':r[4]).trim())})});}
+  if(T.teachers){const h=T.teachers.head,cN=Math.max(col(h,'שם המורה'),col(h,'שם פרטי')),
+    cF=col(h,'תחום','מקצוע'),cG=col(h,'מתחם','מגדר'),cS=col(h,'רצוע'),cSc=col(h,'בית ספר'),
+    cSt=col(h,'סטטוס'),cP=col(h,'טלפון'),cE=col(h,'מייל'),cHr=col(h,'שעות'),
+    cID=col(h,'תעודת זהות','ת.ז','תז');
+    TEACHERS=T.teachers.rows.filter(r=>r[cN]).map(r=>({name:r[cN],
+      field:cF>=0?r[cF]||'':'',gender:genFrom(cG>=0?r[cG]:'')||'',slots:cS>=0?slotsFrom(r[cS]):[],
+      school:cSc>=0?r[cSc]||'':'',status:cSt>=0?r[cSt]||'':'',
+      phone:cP>=0?r[cP]||'':'',email:cE>=0?r[cE]||'':'',hours:cHr>=0?r[cHr]||'':'',
+      idNum:cID>=0?r[cID]||'':''}));}
+  if(T.courses){const h=T.courses.head,cN=col(h,'שם הקורס'),cF=col(h,'תחום'),cG=col(h,'מתחם','מגדר'),
+    cS=col(h,'רצוע'),cT=col(h,'מורה'),cSc=col(h,'בית ספר'),cM=col(h,'מקסימום','תלמידים'),cSt=col(h,'סטטוס');
+    COURSES=T.courses.rows.filter(r=>r[cN]).map(r=>({name:r[cN],field:cF>=0?r[cF]||'':'',
+      gender:genFrom(r[cG])||'',slots:slotsFrom(r[cS]),teacher:cT>=0?r[cT]||'':'',
+      school:cSc>=0?r[cSc]||'':'',cap:cM>=0?parseInt((r[cM]||'').replace(/[^\d]/g,''))||0:0,
+      status:cSt>=0?r[cSt]||'':''}));}
+  if(T.events){const h=T.events.head,cD=col(h,'תאריך'),cT=col(h,'שם האירוע'),cC=col(h,'סוג'),
+    cH=col(h,'שע'),cL=col(h,'מיקום');
+    SHEET_EVS=T.events.rows.filter(r=>r[cT]).map(r=>({d:r[cD]||'',t:r[cT],c:cC>=0?r[cC]||'':'',
+      h:cH>=0?r[cH]||'':'',l:cL>=0?r[cL]||'':''}));}
+}
+
+/* ---------- פענוח לוח השנה (רשת חודשית) — לצורך "אירועים קרובים" בדשבורד ---------- */
+const LUZ_MONTHS={'ספטמבר':[2026,9],'אוקטובר':[2026,10],'נובמבר':[2026,11],'דצמבר':[2026,12],
+  'ינואר':[2027,1],'פברואר':[2027,2],'מרץ':[2027,3],'אפריל':[2027,4],'מאי':[2027,5],'יוני':[2027,6]};
+const LUZ_HOL=['סוכות','ראש השנה','יום כפורים','ערב רה','ערב יו','ערב סוכות','ערב פסח','ערב שבועות',
+ 'חנוכה','פורים','פסח','חוהמ','שבועות','אסרו חג','שמחת תורה','צום','תענית','יום השואה','יום הזיכרון',
+ 'יום העצמאות','לג בעומר','טו בשבט','יום ירושלים','יום המשפחה','נר ראשון','שושן','בחירות','שביעי של פסח'];
+function parseLuzGrid(text){
+  const rows=text.split('\n').map(l=>l.trim()).filter(l=>l.startsWith('|'))
+    .map(l=>l.replace(/^\|/,'').replace(/\|$/,'').split('|')
+      .map(c=>c.trim().replace(/\\/g,'').replace(/\[merged\]/g,'').replace(/\s+/g,' ').trim()))
+    .filter(r=>!r.every(c=>/^:?-+:?$/.test(c)||c===''));
+  const hits={};
+  rows.forEach((r,i)=>{
+    const m=LUZ_MONTHS[(r[0]||'').trim()]; if(!m) return;
+    let c0=-1; for(let c=1;c<r.length;c++){ if(r[c]==='1'){c0=c;break;} }
+    if(c0<0) return;
+    const d0=new Date(Date.UTC(m[0],m[1]-1,1));
+    for(let j=i+1;j<rows.length && !(rows[j][0]||'').trim();j++){
+      for(let c=1;c<rows[j].length;c++){
+        const t=rows[j][c]; if(!t) continue;
+        const d=new Date(d0.getTime()+(c-c0)*864e5);
+        const key=d.toISOString().slice(0,10);
+        (hits[key]=hits[key]||[]).push(t);
+      }
+    }
+  });
+  const out=[];
+  Object.keys(hits).sort().forEach(k=>{
+    let ts=[...new Set(hits[k])].filter(t=>!LUZ_HOL.some(h=>t.includes(h)));
+    if(!ts.length) return;
+    let t;
+    if(ts.length>1){
+      const nums=ts.map(x=>/שיעור (\d+)/.exec(x));
+      if(nums.every(Boolean)){
+        const sem=ts[0].includes("סמ' א")?"סמ' א":"סמ' ב";
+        t='שיעור '+nums.map(x=>+x[1]).sort((a,b)=>a-b).join('/')+' ('+sem+') — לאימות';
+      } else t=ts.join(' / ');
+    } else t=ts[0];
+    const c=/^שיעור \d|^שיעור \d+\//.test(t)?'שיעור':/כנס|האקתון/.test(t)?'כנס':
+            /הערכות/.test(t)?'הערכות':/ציונים|תעודות/.test(t)?'ציונים':
+            /^שיעור/.test(t)?'פתיחה':'אירוע';
+    if(c==='שיעור') return;
+    out.push({d:k,t,c,h:(c==='כנס'||c==='פתיחה')?'09:30–15:30':'',l:'קמפוס חמ"ד'});
+  });
+  return out;
+}
+
+/* ---------- התאמת בתי ספר למאסטר (בדיוק כמו במערכת הניהול) ---------- */
+function matchMaster(n0){const n=norm(n0),a=ALIASES[n];
+  if(a){const m=MASTER.find(x=>norm(x.name).includes(a));if(m)return m}
+  let e=MASTER.find(x=>norm(x.name)===n);if(e)return e;
+  let i=MASTER.find(x=>norm(x.name).includes(n)||n.includes(norm(x.name)));if(i)return i;
+  const stop=new Set(['תיכון','ישיבת','ישיבה','תיכונית','אולפנת','אולפנית','של','בית','ספר','חמד','שש','שנתי','עש']);
+  const tk=n.split(' ').filter(t=>t.length>1&&!stop.has(t));let b=null,bs=0;
+  MASTER.forEach(m=>{const mt=norm(m.name).split(' ');
+    const s=tk.filter(t=>mt.some(x=>x.includes(t)||t.includes(x))).length; if(s>bs){bs=s;b=m}});
+  return bs>=2?b:null;}
+function genderOf(r){ const m=matchMaster(r.name);
+  if(m){const g=m.gender||'';
+    if(g.includes('בנים')&&g.includes('בנות'))return'מעורב';
+    if(g.includes('בנות'))return'בנות'; if(g.includes('בנים'))return'בנים';}
+  const n=norm(r.name);
+  if(/אולפנ|פלך|בנות/.test(n))return'בנות'; if(/ישיב|יבע|בנים/.test(n))return'בנים'; return'מעורב';}
+const splitOf=()=>50; // חלוקת בנים/בנות בבתי ספר מעורבים — הערכה של 50/50 לצורך התצוגה בלבד
+
+function linkAndBuild(){
+  CE=COURSES.map(c=>{
+    const a=ASSIGN_MAP[norm(c.name)];
+    if(!a) return {...c,key:c.name};
+    return {...c,key:c.name,
+      gender:  a.gender  || c.gender,
+      slots:  (a.slots&&a.slots.length) ? a.slots : c.slots,
+      teacher: a.teacher || c.teacher,
+      school:  a.school  || c.school,
+      status:  a.status  || c.status};
+  });
+}
+const stripT=t=>t.replace(/[וי]/g,'').replace(/[אה]$/,'');
+const tokEq=(x,y)=>{const a=stripT(x),b=stripT(y);
+  return a===b || (a.length>=3&&b.length>=3&&a.slice(0,3)===b.slice(0,3))};
+function nameMatch(a,b){
+  const ta=norm(a).split(' ').filter(x=>x.length>1), tb=norm(b).split(' ').filter(x=>x.length>1);
+  if(!ta.length||!tb.length) return false;
+  const hit=ta.filter(x=>tb.some(y=>tokEq(x,y))).length;
+  return hit>=Math.min(2,Math.min(ta.length,tb.length));
+}
+const curSlot=c=>(c.slots&&c.slots[0])||0;
+const curGen=c=>c.gender||'';
+const curSchool=c=>c.school||'';
+const capOf=c=>c.cap>0?c.cap:GS;
+function schoolsIn(sid,gen){
+  return REGS.filter(r=>r.slots.includes(sid)).map(r=>{
+    const g=genderOf(r);
+    if(gen&&gen!=='שניהם'&&g!=='מעורב'&&g!==gen) return null;
+    let n=r.students;
+    if(g==='מעורב'&&gen==='בנים') n=Math.round(r.students*splitOf()/100);
+    else if(g==='מעורב'&&gen==='בנות') n=r.students-Math.round(r.students*splitOf()/100);
+    return {name:r.name,n,mixed:g==='מעורב'};
+  }).filter(x=>x&&x.n>0);
+}
+function compute(){
+  return SLOTS.map(s=>{
+    const inSlot=REGS.filter(r=>r.slots.includes(s.id));
+    let b=0,g=0;const bn=[],gn=[];
+    inSlot.forEach(r=>{const gd=genderOf(r);
+      if(gd==='בנים'){b+=r.students;bn.push([r.name,r.students])}
+      else if(gd==='בנות'){g+=r.students;gn.push([r.name,r.students])}
+      else{const p=splitOf(),x=Math.round(r.students*p/100);b+=x;g+=r.students-x;
+        if(x)bn.push([r.name+' (מעורב)',x]); if(r.students-x)gn.push([r.name+' (מעורב)',r.students-x])}});
+    const inS=CE.filter(c=>c.slots.includes(s.id));
+    const bCo=inS.filter(c=>c.gender==='בנים').length;
+    const gCo=inS.filter(c=>c.gender==='בנות').length;
+    return {slot:s,b,g,bn,gn,n:inSlot.length,bCo,gCo,
+      bNeed:Math.ceil(b/GS)||0,gNeed:Math.ceil(g/GS)||0};});
+}
+function uniqueStudents(){
+  let b=0,g=0;
+  REGS.forEach(r=>{ if(!r.slots.length) return; const gd=genderOf(r);
+    if(gd==='בנים') b+=r.students;
+    else if(gd==='בנות') g+=r.students;
+    else {const x=Math.round(r.students*splitOf()/100); b+=x; g+=r.students-x;}});
+  return {b,g,total:b+g};
+}
+const unslotted=()=>CE.filter(c=>!(c.slots&&c.slots.length));
+const activeCourses=()=>CE.filter(c=>!/בבירור|בוטל/.test(c.status));
+const missingSchools=()=>MASTER.filter(m=>m.joins!==false)
+  .filter(m=>!REGS.some(r=>{const x=matchMaster(r.name);return x&&x.name===m.name}));
+
+const gtag=g=>`<span class="tag ${g==='בנים'?'t-boy':g==='בנות'?'t-girl':'t-mix'}">${g}</span>`;
+const telHref=p=>'tel:'+(p||'').replace(/[^\d+]/g,'');
+const waHref=p=>{let d=(p||'').replace(/[^\d]/g,'');
+  if(d.startsWith('0'))d='972'+d.slice(1); else if(!d.startsWith('972'))d='972'+d;
+  return 'https://wa.me/'+d};
+
+/* ---------- views ---------- */
+function slotCards(D){
+  return `<div class="slots">${D.map(d=>`
+    <div class="slot">
+      <div class="slot-h"><b>${d.slot.label}</b><span><span class="ltr">${d.slot.time}</span> · ${d.n} בתי ספר</span></div>
+      <div class="slot-b">
+        <div class="gbox boys">
+          <div class="row1"><span>בנים</span>
+            <span class="bignum"><b class="big">${d.b}</b><i>תלמידים</i></span></div>
+          <div class="meta"><span class="cpill boys">${d.bNeed} קורסים</span>${CE.length?` <span class="cpill2">${d.bCo} שובצו</span>`:''}</div>
+          ${CE.length&&d.bNeed>d.bCo?`<div class="meta" style="color:var(--bad);font-weight:700">חסרים ${d.bNeed-d.bCo} קורסים</div>`:''}
+          <div class="schools">${esc(d.bn.map(x=>x[0]+' ('+x[1]+')').join(' · '))||'אין הרשמות'}</div></div>
+        <div class="gbox girls">
+          <div class="row1"><span>בנות</span>
+            <span class="bignum"><b class="big">${d.g}</b><i>תלמידות</i></span></div>
+          <div class="meta"><span class="cpill girls">${d.gNeed} קורסים</span>${CE.length?` <span class="cpill2">${d.gCo} שובצו</span>`:''}</div>
+          ${CE.length&&d.gNeed>d.gCo?`<div class="meta" style="color:var(--bad);font-weight:700">חסרים ${d.gNeed-d.gCo} קורסים</div>`:''}
+          <div class="schools">${esc(d.gn.map(x=>x[0]+' ('+x[1]+')').join(' · '))||'אין הרשמות'}</div></div>
+        <div class="tot"><span>סה"כ ברצועה</span><span>${d.b+d.g} תלמידים · ${d.bNeed+d.gNeed} קורסים</span></div>
+      </div></div>`).join('')}</div>`;
+}
+function vDash(){
+  const D=compute(),tot=D.reduce((a,d)=>a+d.bNeed+d.gNeed,0);
+  const U=uniqueStudents(), meetings=D.reduce((a,d)=>a+d.b+d.g,0), mis=missingSchools();
+  const act=activeCourses().length, gap=tot-act, uns=unslotted().length;
+  const today=new Date().toISOString().slice(0,10);
+  const next=SHEET_EVS.filter(e=>!e.d||e.d>=today).sort((a,b)=>(a.d||'9999').localeCompare(b.d||'9999')).slice(0,4);
+  return `
+  <div class="kpis" style="margin-bottom:14px">
+    <div class="kpi"><div class="v">${REGS.length}</div><div class="l">בתי ספר נרשמו</div></div>
+    <div class="kpi"><div class="v">${U.total}</div><div class="l">תלמידים רשומים${meetings>U.total?` · ${meetings} מפגשים`:''}</div></div>
+    <div class="kpi"><div class="v">${tot}</div><div class="l">קורסים לפתיחה</div></div>
+    <div class="kpi ${gap>0?'alert':'good'}"><div class="v">${gap>0?gap:'✓'}</div>
+      <div class="l">${gap>0?'קורסים חסרים':'מספר הקורסים מספיק'}</div></div>
+    <div class="kpi ${uns?'alert':'good'}"><div class="v">${uns}</div><div class="l">קורסים ללא רצועה</div></div>
+    <div class="kpi ${mis.length?'alert':'good'}"><div class="v">${mis.length}</div><div class="l">בתי ספר טרם נרשמו</div></div>
+  </div>
+  <div class="card"><h2>סטטוס הרצועות</h2>
+    <div class="sub" style="margin-bottom:11px">בכל רצועה למידה נפרדת לבנים ולבנות</div>
+    ${slotCards(D)}</div>
+  <div class="grid2">
+    <div class="card"><h2>דורש טיפול</h2>
+      <ul style="margin:8px 0 0;padding-inline-start:18px;font-size:12.8px">
+      ${gap>0?`<li>נדרשים <b>${tot} קורסים</b> ויש כרגע <b>${act}</b> — חסרים ${gap}</li>`:''}
+      ${uns?`<li><b>${uns} קורסים</b> עדיין ללא שיוך לרצועה</li>`:''}
+      ${CE.filter(c=>!c.gender).length?`<li><b>${CE.filter(c=>!c.gender).length} קורסים</b> ללא שיוך למתחם בנים/בנות</li>`:''}
+      ${mis.length?`<li><b>${mis.length} בתי ספר</b> טרם נרשמו — ${esc(mis.slice(0,3).map(m=>m.name).join(', '))}${mis.length>3?' ועוד':''}</li>`:''}
+      ${REGS.filter(r=>genderOf(r)==='מעורב').length?`<li>יש לאמת פיצול בנים/בנות ב-<b>${REGS.filter(r=>genderOf(r)==='מעורב').length} בתי ספר שש-שנתיים</b></li>`:''}
+      ${!gap&&!uns&&!mis.length?'<li>אין חריגים פתוחים 🎉</li>':''}
+      </ul></div>
+    <div class="card"><h2>אירועים קרובים</h2>
+      ${next.map(e=>`<div class="ev" style="padding-inline-start:0">
+        <div class="t">${esc(e.t)}</div>
+        <div class="d"><span class="ltr">${esc(e.d)}</span>${e.h?' · <span class="ltr">'+esc(e.h)+'</span>':''}${e.l?' · '+esc(e.l):''}</div>
+      </div>`).join('')||'<div class="empty">אין אירועים</div>'}</div>
+  </div>`;
+}
+/* ---------- לוח שיבוץ (תצוגה בלבד, אותו מבנה ויזואלי כמו במערכת המקומית) ---------- */
+function assignCard(c){
+  const sl=curSlot(c), gn=curGen(c), sc=curSchool(c);
+  const bad=/בבירור/.test(c.status);
+  return `<div class="ccard ${bad?'q':''}">
+    <div class="cname">${esc(c.name)}</div>
+    <div class="sub">${esc(c.teacher)||'ללא מורה'}${c.field?' · '+esc(c.field):''}${bad?' · <b style="color:var(--warn)">בבירור</b>':''}</div>
+    <div class="crow">
+      <span class="tag t-slot">${sl?esc(SLOTS[sl-1].label)+' · '+SLOTS[sl-1].time:'ללא רצועה'}</span>
+      ${gn?gtag(gn):'<span class="tag t-warn">— מתחם —</span>'}
+      <span class="tag">בית ספר: ${esc(sc)||'כלל בתי הספר ברצועה'}</span>
+      <span class="tag">מקס׳ ${capOf(c)}</span>
+    </div></div>`;
+}
+function assignCell(sid,g){
+  const D=compute();
+  const list=CE.filter(c=>curSlot(c)===sid&&curGen(c)===g);
+  const need=g==='בנים'?D[sid-1].bNeed:D[sid-1].gNeed;
+  const stu=g==='בנים'?D[sid-1].b:D[sid-1].g;
+  const gap=need-list.length, sch=schoolsIn(sid,g);
+  const seats=list.reduce((a,c)=>a+capOf(c),0), lack=stu-seats;
+  return `<div class="acell ${g==='בנים'?'boys':'girls'}">
+    <div class="ahead"><span>${g} · ${stu} תלמידים</span>
+      <span class="tag ${gap>0?'t-bad':gap<0?'t-warn':'t-ok'}">${list.length} / ${need}${gap>0?` · חסרים ${gap}`:gap<0?` · עודף ${-gap}`:''}</span></div>
+    ${list.length?`<div class="tag ${lack>0?'t-bad':'t-ok'}" style="display:inline-block;margin-bottom:7px">${seats} מקומות${lack>0?` · חסרים ${lack} מקומות`:''}</div>`:''}
+    <div class="aschools">${sch.map(o=>`<span class="stag">${esc(o.name)} <b>${o.n}</b>${o.mixed?' <i>מעורב</i>':''}</span>`).join('')||'<span class="stag">אין בתי ספר ברצועה</span>'}</div>
+    ${list.map(assignCard).join('')||'<div class="aempty">אין קורסים משובצים כאן</div>'}</div>`;
+}
+function vAssign(){
+  if(!CE.length) return `<div class="card"><h2>לוח שיבוץ</h2><div class="empty">טרם הוזנה רשימת קורסים בגיליון.</div></div>`;
+  const pool=CE.filter(c=>!curSlot(c)||!curGen(c));
+  const flex=sid=>CE.filter(c=>curSlot(c)===sid&&curGen(c)==='שניהם');
+  return `
+  <div class="card"><h2>לוח שיבוץ</h2>
+    <div class="sub" style="margin-bottom:10px">${CE.length-pool.length} מתוך ${CE.length} קורסים משובצים במלואם (רצועה + מתחם). מוצג בדיוק כפי שהוא נכתב בגיליון.</div>
+    <div class="aboard">${SLOTS.map(s=>`
+      <div class="acol">
+        <div class="acolh"><b>${s.label}</b><span class="ltr">${s.time}</span></div>
+        ${assignCell(s.id,'בנים')}${assignCell(s.id,'בנות')}
+        ${flex(s.id).length?`<div class="acell"><div class="ahead"><span>שניהם</span></div>${flex(s.id).map(assignCard).join('')}</div>`:''}
+      </div>`).join('')}</div>
+  </div>
+  <div class="card"><h2>מאגר הקורסים <span class="sub">(${pool.length} ללא שיבוץ מלא)</span></h2>
+    <div class="apool">${pool.map(assignCard).join('')||'<div class="empty">כל הקורסים שובצו 🎉</div>'}</div>
+  </div>`;
+}
+/* ---------- קורסים ובתי ספר ---------- */
+function vCourses(){
+  const D=compute();
+  if(!CE.length) return `<div class="card"><h2>קורסים ובתי ספר</h2><div class="empty">טרם הוזנה רשימת קורסים בגיליון.</div></div>`;
+  return SLOTS.map((s,i)=>{const d=D[i];
+    const inSlot=g=>CE.filter(c=>c.slots.includes(s.id)&&c.gender===g);
+    const box=(g,need)=>{const list=inSlot(g);
+      return `<div><h3>${g} — ${list.length} מתוך ${need} נדרשים
+        ${list.length<need?`<span class="tag t-bad">חסרים ${need-list.length}</span>`:'<span class="tag t-ok">מלא</span>'}</h3>
+        ${list.length?`<table><thead><tr><th>קורס</th><th>מורה</th><th>בית ספר</th><th>מקס׳</th></tr></thead>
+        <tbody>${list.map(c=>`<tr><td><b>${esc(c.name)}</b><div class="sub">${esc(c.field)}</div></td>
+          <td>${c.teacher?esc(c.teacher):'<span class="tag t-bad">לא שובץ</span>'}</td>
+          <td class="sub">${esc(curSchool(c))||'כלל בתי הספר ברצועה'}</td>
+          <td class="num">${capOf(c)}</td></tr>`).join('')}</tbody></table>`
+        :'<div class="empty">טרם הוגדרו קורסים</div>'}</div>`};
+    const flexList=CE.filter(c=>c.slots.includes(s.id)&&!c.gender);
+    return `<div class="card"><h2>${s.label} <span class="sub ltr">${s.time}</span></h2>
+      <div class="sub" style="margin-bottom:6px">בתי ספר ברצועה: ${esc(REGS.filter(r=>r.slots.includes(s.id)).map(r=>r.name).join(' · '))||'אין'}</div>
+      <div class="grid2">${box('בנים',d.bNeed)}${box('בנות',d.gNeed)}</div>
+      ${flexList.length?`<div class="sub" style="margin-top:9px">ללא שיוך למתחם: ${esc(flexList.map(c=>c.name).join(' · '))}</div>`:''}</div>`;
+  }).join('') + (()=>{const u=unslotted(); if(!u.length)return'';
+    return `<div class="card"><h2>קורסים שטרם שובצו לרצועה <span class="sub">(${u.length})</span></h2>
+      <table><thead><tr><th>קורס</th><th>תחום</th><th>מתחם</th><th>מורה</th><th>סטטוס</th></tr></thead>
+      <tbody>${u.map(c=>`<tr><td><b>${esc(c.name)}</b></td><td class="sub">${esc(c.field)}</td>
+        <td>${c.gender?gtag(c.gender):'<span class="tag t-warn">לא נקבע</span>'}</td>
+        <td>${esc(c.teacher)||'<span class="tag t-bad">לא שובץ</span>'}</td>
+        <td><span class="tag ${/מאושר/.test(c.status)?'t-ok':'t-warn'}">${esc(c.status)||'—'}</span></td></tr>`).join('')}
+      </tbody></table></div>`})();
+}
+/* ---------- מצבת מורים — שעות בקמפוס ---------- */
+const HPG=2; // שעות אקדמיות לקבוצה
+function teacherHours(){
+  return TEACHERS.map(t=>{
+    const cs=CE.filter(x=>x.teacher&&nameMatch(t.name,x.teacher));
+    const slotted=cs.filter(x=>curSlot(x));
+    return {t, courses:slotted, n:slotted.length, unslotted:cs.length-slotted.length, hours:slotted.length*HPG};
+  }).sort((a,b)=>b.hours-a.hours||a.t.name.localeCompare(b.t.name,'he'));
+}
+function teacherSlots(r){
+  const ids=[...new Set((r.courses||[]).map(c=>curSlot(c)).filter(Boolean))];
+  if(ids.length) return ids.sort((a,b)=>a-b);
+  return (r.t.slots||[]).slice();
+}
+function vRoster(){
+  if(!TEACHERS.length) return `<div class="card"><h2>מצבת מורים — שעות בקמפוס</h2><div class="empty">טרם הוזנה רשימת מורים.</div></div>`;
+  const rows=teacherHours();
+  const totH=rows.reduce((a,r)=>a+r.hours,0), totN=rows.reduce((a,r)=>a+r.n,0);
+  const st=s=>/מאושר|סגור/.test(s)?'t-ok':/בבירור|תהליך/.test(s)?'t-warn':'t-bad';
+  return `
+  <div class="card"><h2>מצבת מורים — שעות בקמפוס</h2>
+    <div class="sub" style="margin-bottom:11px">כל קבוצה/מחזור נספרת כרצועה אחת (${HPG} שעות אקדמיות). ${TEACHERS.length} מורים ·
+      <b>${totN} קבוצות</b> · <b>${totH} שעות אקדמיות</b> סה"כ.</div>
+    <div class="scroll"><table class="tt">
+      <thead><tr><th style="width:18%">מורה</th><th style="width:13%">ת.ז.</th><th style="width:12%">תחום</th>
+        <th style="width:9%">קבוצות</th><th style="width:11%">שעות אקדמיות</th>
+        <th style="width:20%">רצועות</th><th style="width:10%">סטטוס</th></tr></thead>
+      <tbody>${rows.map(r=>`<tr>
+        <td><b>${esc(r.t.name)}</b></td>
+        <td class="ltr">${esc(r.t.idNum)||'—'}</td>
+        <td class="sub">${esc(r.t.field)||'—'}</td>
+        <td class="num">${r.n}${r.unslotted?` <span class="tag t-warn" style="margin-inline-start:4px">+${r.unslotted} טרם שובצו</span>`:''}</td>
+        <td class="num"><b>${r.hours}</b></td>
+        <td>${(()=>{const ids=teacherSlots(r); return ids.length
+          ? ids.map(i=>`<span class="tag t-slot ltr">${SLOTS[i-1].time}</span>`).join('')
+          : '<span class="sub">טרם שובץ</span>';})()}</td>
+        <td>${r.t.status?`<span class="tag ${st(r.t.status)}">${esc(r.t.status)}</span>`:'<span class="sub">—</span>'}</td></tr>`).join('')}
+      <tr style="background:var(--brand-soft)"><td colspan="3"><b>סה"כ</b></td>
+        <td class="num"><b>${totN}</b></td><td class="num"><b>${totH}</b></td><td colspan="2"></td></tr>
+      </tbody></table></div>
+    <div class="sub" style="margin-top:6px">מקור: שיוך המורה לכל קורס בגיליון הקורסים · לוח השיבוץ קובע כמה מהקבוצות כבר שובצו לרצועה.</div>
+  </div>`;
+}
+/* ---------- אנשי קשר ---------- */
+function contactRow(name,role,phone,mail,tag){
+  const ok=/^[\d\s\-+()]{7,}$/.test(phone||'');
+  return `<div class="cc" data-search="${esc((name+' '+role+' '+(phone||'')+' '+(mail||'')).toLowerCase())}">
+    <div class="cc-main">
+      <div><b>${esc(name)||'—'}</b>${tag?` <span class="tag t-slot">${esc(tag)}</span>`:''}
+        <div class="sub">${esc(role)}</div></div>
+    </div>
+    <div class="cc-links">
+      ${ok?`<a class="cbtn" href="${telHref(phone)}"><span class="ltr">${esc(phone)}</span></a>
+           <a class="cbtn wa" href="${waHref(phone)}" target="_blank" rel="noopener">ווטסאפ</a>`
+         :`<span class="sub">${esc(phone)||'ללא טלפון'}</span>`}
+      ${mail&&mail.includes('@')?`<a class="cbtn" href="mailto:${esc(mail)}"><span class="ltr">${esc(mail)}</span></a>`:''}
+    </div></div>`;
+}
+function vContacts(){
+  const st=s=>/מאושר/.test(s)?'t-ok':/בבירור/.test(s)?'t-warn':'t-bad';
+  return `
+  <div class="card"><h2>אנשי קשר</h2>
+    <div class="sub" style="margin-bottom:10px">${TEACHERS.length} מורים · ${REGS.length} בתי ספר. לחיצה על מספר מחייגת, לחיצה על מייל פותחת הודעה.</div>
+    <input type="text" id="ccSearch" placeholder="חיפוש לפי שם, בית ספר, טלפון או מייל" style="width:100%;max-width:420px">
+  </div>
+  <div class="card"><h2>מורי הקמפוס <span class="sub">(${TEACHERS.length})</span></h2>
+    <div class="cgrid">${TEACHERS.map(t=>`
+      <div class="ccard2" data-search="${esc((t.name+' '+(t.courses||[]).map(c=>c.name).join(' ')+' '+t.phone+' '+t.email).toLowerCase())}">
+        <div class="cc-head"><b>${esc(t.name)}</b>
+          ${t.status?`<span class="tag ${st(t.status)}">${esc(t.status)}</span>`:''}</div>
+        <div class="sub">${esc(CE.filter(c=>c.teacher&&nameMatch(t.name,c.teacher)).map(c=>c.name).join(' · '))||'טרם שויך קורס'}</div>
+        <div class="cc-links">
+          ${t.phone?`<a class="cbtn" href="${telHref(t.phone)}"><span class="ltr">${esc(t.phone)}</span></a>
+            <a class="cbtn wa" href="${waHref(t.phone)}" target="_blank" rel="noopener">ווטסאפ</a>`:'<span class="sub">ללא טלפון</span>'}
+          ${t.email?`<a class="cbtn" href="mailto:${esc(t.email)}"><span class="ltr">${esc(t.email)}</span></a>`:''}
+        </div></div>`).join('')||'<div class="empty">טרם הוזנה רשימת מורים.</div>'}</div></div>
+  <div class="card"><h2>אנשי קשר בבתי הספר <span class="sub">(${REGS.length} בתי ספר)</span></h2>
+    <div class="cgrid">${REGS.map(r=>`
+      <div class="ccard2 school" data-search="${esc((r.name+' '+r.who+' '+r.lead+' '+r.tech+' '+r.leadPhone+' '+r.leadMail+' '+r.techPhone).toLowerCase())}">
+        <div class="cc-head"><b>${esc(r.name)}</b>
+          <span class="tag t-slot">${r.slots.map(i=>SLOTS[i-1].label.replace('רצועה ','ר')).join(' · ')||'ללא רצועה'}</span></div>
+        ${r.who?`<div class="cc-line"><span class="crole">ממלא הטופס</span> ${esc(r.who)}</div>`:''}
+        ${r.lead?contactRow(r.lead,'מוביל התוכנית',r.leadPhone,r.leadMail):''}
+        ${r.tech?contactRow(r.tech,'רכז תקשוב',r.techPhone,''):''}
+      </div>`).join('')}</div></div>`;
+}
+
+const TABS=[{k:'dash',n:'דשבורד'},{k:'assign',n:'לוח שיבוץ'},{k:'courses',n:'קורסים ובתי ספר'},
+            {k:'roster',n:'מצבת מורים'},{k:'contacts',n:'אנשי קשר'}];
+let tab='dash';
+(function(){const h=(location.hash||'').replace('#','').trim();
+  if(h && TABS.some(t=>t.k===h)) tab=h;})();
+
+function render(){
+  try{ if(('#'+tab)!==location.hash) history.replaceState(null,'','#'+tab); }catch(e){}
+  const badge={courses:CE.length,assign:unslotted().length,roster:TEACHERS.length,contacts:TEACHERS.length+REGS.length};
+  document.getElementById('nav').innerHTML=TABS.map(t=>
+    `<button data-tab="${t.k}" class="${tab===t.k?'on':''}">${t.n}${badge[t.k]!==undefined?`<span class="b">${badge[t.k]}</span>`:''}</button>`).join('');
+  const v={dash:vDash,assign:vAssign,courses:vCourses,roster:vRoster,contacts:vContacts}[tab]||vDash;
+  document.getElementById('view').innerHTML=v();
+  const D=compute(),tot=D.reduce((a,d)=>a+d.bNeed+d.gNeed,0);
+  document.getElementById('src').innerHTML=`סה"כ <b>${tot} קורסים</b> לפתוח · ${REGS.length} בתי ספר נרשמו · מסונכרן מגיליון ההרשמות (לצפייה בלבד)`;
+  wire();
+}
+function wire(){
+  document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;
+    try{history.replaceState(null,'','#'+tab)}catch(e){} render()});
+  const cs=document.getElementById('ccSearch');
+  if(cs)cs.oninput=e=>{const q=e.target.value.trim().toLowerCase();
+    document.querySelectorAll('[data-search]').forEach(el=>{
+      el.style.display=(!q||el.dataset.search.includes(q))?'':'none';})};
+}
+
+function bar(kind,html){
+  const el=document.getElementById('offbar');
+  const cls=kind==='live'?'card note ok':'card note bad';
+  el.innerHTML='<div class="'+cls+'" style="background:'+(kind==='live'?'var(--ok-soft)':'var(--bad-soft)')+';color:'+(kind==='live'?'#0b5c40':'#8e2318')+';border-radius:10px;padding:11px 13px;font-size:12.5px">'+html+'</div>';
+}
+const fmtAt=iso=>{const d=new Date(iso);
+  return d.toLocaleDateString('he-IL')+' '+d.toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'});};
+
+async function fetchLive(){
+  const [reg,cou,mas]=await Promise.all([getRows('regs'),getRows('courses'),getRows('master')]);
+  const teach=await getRows('teachers').catch(e=>{console.warn('teachers feed',e);return [];});
+  const main=[toPipe(reg),toPipe(teach),toPipe(cou),toPipe(mas)].join('\n\n');
+  let lz=null; try{ lz=toPipe(await getRows('luz')); }catch(e){ console.warn('luz feed',e); }
+  return {main,luz:lz,at:new Date().toISOString()};
+}
+async function boot(){
+  document.getElementById('err').innerHTML='';
+  document.getElementById('btnSync').textContent='מרענן…'; document.getElementById('btnSync').disabled=true;
+  try{
+    const d=await fetchLive();
+    buildData(parseSheet(d.main));
+    ASSIGN_MAP=await getAssignMap();
+    if(d.luz){ const g=parseLuzGrid(d.luz); if(g.length) SHEET_EVS=g; }
+    linkAndBuild();
+    bar('live','<b>מחובר לגיליון.</b> הנתונים נטענו ישירות מהגיליון · עודכן: '+fmtAt(d.at)+'.');
+    render();
+  }catch(e){
+    console.warn('live load failed',e);
+    bar('bad','<b>לא הצלחתי להתחבר לגיליון כרגע</b> ('+esc(e.message)+'). רעני את הדף בעוד רגע — הדף הזה תמיד קורא נתונים חיים ואינו שומר עותק מקומי.');
+  }
+  const b=document.getElementById('btnSync'); b.textContent='🔄 רענון מהגיליון'; b.disabled=false;
+}
+document.getElementById('btnSync').onclick=boot;
+boot();
+</script>
+</body>
+</html>
