@@ -165,6 +165,7 @@ function GVIZOF(key){
     courses: {id:FILE_ID, gid:'241967168'},
     master:  {id:FILE_ID, gid:'611332690'},
     assign:  {id:FILE_ID, sheet:'שיבוץ קורסים'},
+    team:    {id:FILE_ID, sheet:'צוות ניהול'},
     luz:     {id:LUZ_ID,  gid:'684316836'}
   }[key];
 }
@@ -224,7 +225,7 @@ const ALIASES={'נתיבות דרור':'נתיבות דרור','אולפנת א�
  'אולפנת סגולה':'סגולה','אולפנית אמונה אלישבע':'אמונה אלישבע','אולפנית אמית שחר אור עקיבא':'אמית שחר',
  'אולפנת צביה חיפה':'צביה חיפה','ישיבת צביה פרדס חנה':'פרדס חנה','עירוני ב':'פרחי אהרון'};
 
-let REGS=[],MASTER=[],TEACHERS=[],COURSES=[],SHEET_EVS=[],CE=[],ASSIGN_MAP={};
+let TEAM=[],REGS=[],MASTER=[],TEACHERS=[],COURSES=[],SHEET_EVS=[],CE=[],ASSIGN_MAP={};
 
 /* ---------- שיוך בפועל מלוח השיבוץ (תוקן 22.9.2026) ---------------------
    לשונית "קורסים תשפ\"ז" (courses, gid קבוע) היא הקטלוג ה*בסיסי* של
@@ -236,6 +237,17 @@ let REGS=[],MASTER=[],TEACHERS=[],COURSES=[],SHEET_EVS=[],CE=[],ASSIGN_MAP={};
    כשהשיבוץ בפועל כן סונכרן בהצלחה. התיקון: קוראים גם את "שיבוץ קורסים"
    ומשכבים (overlay) את הערכים שלה — רצועה/מתחם/מורה/בית ספר/סטטוס — מעל
    הקטלוג הבסיסי, לפי שם קורס, בדיוק כמו שמערכת הניהול עצמה עושה מקומית. */
+/* צוות הניהול — נקרא מלשונית "צוות ניהול" בגיליון (עמודות: שם, תפקיד, טלפון, אימייל).
+   אם הלשונית לא קיימת, גוגל עלול להחזיר במקומה לשונית אחרת — לכן בודקים שהכותרות מתאימות. */
+async function getTeam(){
+  try{
+    const rows=await getRows('team'); if(!rows||rows.length<2) return [];
+    const h=rows[0], cN=col(h,'שם'), cR=col(h,'תפקיד'), cP=col(h,'טלפון'), cE=col(h,'אימייל','מייל');
+    if(cN<0||cE<0||cR<0||h.some(x=>x.includes('חותמת'))) return [];
+    return rows.slice(1).filter(r=>r[cN]).map(r=>({name:r[cN],role:r[cR]||'',
+      phone:cP>=0?r[cP]||'':'',email:r[cE]||''}));
+  }catch(e){ console.warn('team feed',e); return []; }
+}
 async function getAssignMap(){
   try{
     const rows=await getRows('assign');
@@ -653,9 +665,19 @@ function vContacts(){
   const st=s=>/מאושר/.test(s)?'t-ok':/בבירור/.test(s)?'t-warn':'t-bad';
   return `
   <div class="card"><h2>אנשי קשר</h2>
-    <div class="sub" style="margin-bottom:10px">${TEACHERS.length} מורים · ${REGS.length} בתי ספר. לחיצה על מספר מחייגת, לחיצה על מייל פותחת הודעה.</div>
+    <div class="sub" style="margin-bottom:10px">${TEAM.length?TEAM.length+' צוות ניהול · ':''}${TEACHERS.length} מורים · ${REGS.length} בתי ספר. לחיצה על מספר מחייגת, לחיצה על מייל פותחת הודעה.</div>
     <input type="text" id="ccSearch" placeholder="חיפוש לפי שם, בית ספר, טלפון או מייל" style="width:100%;max-width:420px">
   </div>
+  ${TEAM.length?`<div class="card"><h2>צוות הניהול <span class="sub">(${TEAM.length})</span></h2>
+    <div class="cgrid">${TEAM.map(m=>`
+      <div class="ccard2" data-search="${esc((m.name+' '+m.role+' '+m.phone+' '+m.email).toLowerCase())}">
+        <div class="cc-head"><b>${esc(m.name)}</b></div>
+        <div class="sub">${esc(m.role)}</div>
+        <div class="cc-links">
+          ${m.phone?`<a class="cbtn" href="${telHref(m.phone)}"><span class="ltr">${esc(m.phone)}</span></a>
+            <a class="cbtn wa" href="${waHref(m.phone)}" target="_blank" rel="noopener">ווטסאפ</a>`:'<span class="sub">ללא טלפון</span>'}
+          ${m.email?`<a class="cbtn" href="mailto:${esc(m.email)}"><span class="ltr">${esc(m.email)}</span></a>`:''}
+        </div></div>`).join('')}</div></div>`:''}
   <div class="card"><h2>מורי הקמפוס <span class="sub">(${TEACHERS.length})</span></h2>
     <div class="cgrid">${TEACHERS.map(t=>`
       <div class="ccard2" data-search="${esc((t.name+' '+(t.courses||[]).map(c=>c.name).join(' ')+' '+t.phone+' '+t.email).toLowerCase())}">
@@ -687,7 +709,7 @@ let tab='assign';
 
 function render(){
   try{ if(('#'+tab)!==location.hash) history.replaceState(null,'','#'+tab); }catch(e){}
-  const badge={courses:CE.length,assign:unslotted().length,roster:TEACHERS.length,contacts:TEACHERS.length+REGS.length};
+  const badge={courses:CE.length,assign:unslotted().length,roster:TEACHERS.length,contacts:TEAM.length+TEACHERS.length+REGS.length};
   document.getElementById('nav').innerHTML=TABS.map(t=>
     `<button data-tab="${t.k}" class="${tab===t.k?'on':''}">${t.n}${badge[t.k]!==undefined?`<span class="b">${badge[t.k]}</span>`:''}</button>`).join('');
   const v={dash:vDash,assign:vAssign,courses:vCourses,roster:vRoster,contacts:vContacts}[tab]||vAssign;
@@ -727,6 +749,7 @@ async function boot(){
     const d=await fetchLive();
     buildData(parseSheet(d.main));
     ASSIGN_MAP=await getAssignMap();
+    TEAM=await getTeam();
     if(d.luz){ const g=parseLuzGrid(d.luz); if(g.length) SHEET_EVS=g; }
     linkAndBuild();
     bar('live','<b>מחובר לגיליון.</b> הנתונים נטענו ישירות מהגיליון · עודכן: '+fmtAt(d.at)+'.');
