@@ -402,7 +402,9 @@ function linkAndBuild(){
 }
 const stripT=t=>t.replace(/[וי]/g,'').replace(/[אה]$/,'');
 const tokEq=(x,y)=>{const a=stripT(x),b=stripT(y);
-  return a===b || (a.length>=3&&b.length>=3&&a.slice(0,3)===b.slice(0,3))};
+  /* כתיב חסר/מלא: ליגטי = ליגאטי — משווים גם בלי אותיות אהו"י (נוסף 4.10.2026) */
+  const ca=x.replace(/[אהוי]/g,''), cb=y.replace(/[אהוי]/g,'');
+  return a===b || (ca.length>=2&&ca===cb) || (a.length>=3&&b.length>=3&&a.slice(0,3)===b.slice(0,3))};
 function nameMatch(a,b){
   const ta=norm(a).split(' ').filter(x=>x.length>1), tb=norm(b).split(' ').filter(x=>x.length>1);
   if(!ta.length||!tb.length) return false;
