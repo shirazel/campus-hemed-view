@@ -786,7 +786,7 @@ function mlCopy(t,el,done){
    שליחה: העתקה מעוצבת להדבקה בג'ימייל, או סקריפט Gmail (טיוטות/שליחה) מהחשבון המחובר. */
 const CMP_THEMES={clean:{n:'נקי, בלי כותרת',c:''},navy:{n:'כותרת כחולה',c:'#3b4a9e'},
   brass:{n:'כותרת זהב',c:'#a8783a'},green:{n:'כותרת ירוקה',c:'#2f7d5b'}};
-let cmp=Object.assign({subj:'',title:'קמפוס חמ"ד תשפ"ז',theme:'navy',sign:'צוות קמפוס חמ"ד',
+let cmp=Object.assign({subj:'',title:'קמפוס חמ"ד תשפ"ז',theme:'navy',sign:'{שולח}',
   html:'<p>שלום {שם פרטי},</p><p>כאן כותבים את תוכן המייל.</p>',sel:[],q:'',pv:'',img:null,imgMode:'inline'},cmpLoad());
 const cmpSave=()=>{try{const o=Object.assign({},cmp); delete o.img; localStorage.setItem('chemed_view_cmp',JSON.stringify(o))}catch(e){}};
 const cmpOk=p=>!!p.mail&&p.mail.includes('@');
@@ -830,15 +830,18 @@ function cmpPlain(h){
 const cmpFirst=c=>(c.name||'').split(/\s+/)[0]||c.name;
 const cmpFill=(s,c)=>String(s).replace(/\{שם פרטי\}/g,cmpFirst(c)).replace(/\{שם\}/g,c.name).replace(/\{שיוך\}/g,c.role).replace(/\{רצועות\}/g,c.slots||cmpAllSlots());
 const cmpFillH=(s,c)=>String(s).replace(/\{שם פרטי\}/g,esc(cmpFirst(c))).replace(/\{שם\}/g,esc(c.name)).replace(/\{שיוך\}/g,esc(c.role)).replace(/\{רצועות\}/g,esc(c.slots||cmpAllSlots()));
+/* חתימה = שם השולח/ת שנבחר בסעיף "שליחה ישירה". {שולח} מוחלף בשמו; כשלא נבחר איש — "צוות קמפוס חמ\"ד" */
+const cmpSenderName=()=>{const w=document.getElementById('sdWho'); return w&&w.value?(w.options[w.selectedIndex].dataset.name||''):''};
+const cmpSignText=()=>{const t=(cmp.sign==='צוות קמפוס חמ"ד')?'{שולח}':String(cmp.sign||''); return t.replace(/\{שולח\}/g,cmpSenderName()||'צוות קמפוס חמ"ד')};
 function cmpEmailHtml(c,forScript){
   const th=CMP_THEMES[cmp.theme]||CMP_THEMES.navy;
   const body=cmpFillH(cmpClean(cmp.html),c);
   const head=th.c?`<div style="background:${th.c};color:#ffffff;padding:18px 24px;font-size:20px;font-weight:bold">${esc(cmp.title)}</div>`:'';
-  const sign=cmp.sign?`<p style="margin:22px 0 0">${esc(cmp.sign)}</p>`:'';
+  const sign=cmpSignText()?`<p style="margin:22px 0 0">${esc(cmpSignText())}</p>`:'';
   const img=(cmp.img&&cmp.imgMode==='inline')?`<p style="margin:18px 0 0;text-align:center"><img src="${forScript?'cid:img1':'data:'+cmp.img.mime+';base64,'+cmp.img.b64}" alt="" style="max-width:100%;height:auto;border-radius:8px"></p>`:'';
   return `<div dir="rtl" style="background:#f5f6fb;padding:18px;font-family:Arial,Helvetica,sans-serif"><div style="max-width:620px;margin:0 auto;background:#ffffff;border-radius:10px;overflow:hidden;border:1px solid #e4e7f0">${head}<div style="padding:22px 24px;font-size:15px;line-height:1.7;color:#1e2338;text-align:right">${body}${img}${sign}</div></div></div>`;
 }
-const cmpPlainFor=c=>cmpFill(cmpPlain(cmp.html),c)+(cmp.sign?'\n\n'+cmp.sign:'');
+const cmpPlainFor=c=>cmpFill(cmpPlain(cmp.html),c)+(cmpSignText()?'\n\n'+cmpSignText():'');
 function cmpListHtml(){
   const q=(cmp.q||'').trim().toLowerCase();
   const pool=cmpPool().filter(p=>!q||(p.name+' '+p.role+' '+p.grp+' '+p.mail).toLowerCase().includes(q));
@@ -889,7 +892,7 @@ function vCompose(){
     </div>
     <div class="mlgrid" style="margin-top:8px">
       <div><div class="sub">טקסט הכותרת הצבעונית</div><input type="text" id="cmpTitle" class="mlin" value="${esc(cmp.title)}"></div>
-      <div><div class="sub">חתימה</div><input type="text" id="cmpSign" class="mlin" value="${esc(cmp.sign)}"></div>
+      <div><div class="sub">חתימה (‏{שולח}‏ = שם השולח/ת שנבחר למטה בסעיף 4)</div><input type="text" id="cmpSign" class="mlin" value="${esc(cmp.sign)}"></div>
     </div>
     <div class="cmp-tb" id="cmpTb">
       <button class="btn ghost mini" data-cmd="bold"><b>B</b></button>
@@ -923,8 +926,8 @@ function vCompose(){
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
       <button class="btn" id="cmpCopy">📋 העתקה מעוצבת (להדבקה בג'ימייל)</button>
       <a class="btn ghost" id="cmpMailto" style="text-decoration:none" target="_blank" rel="noopener">✉️ פתיחה במייל (טקסט בלבד)</a>
-      <button class="btn" id="cmpScriptCopy">📋 העתקת הסקריפט (להדבקה ב-Apps Script)</button>
-      <button class="btn ghost" id="cmpScript">⚙️ הורדה כקובץ</button>
+      <button class="btn" id="cmpScriptCopy"${SEND_URL?' style="display:none"':''}>📋 העתקת הסקריפט (להדבקה ב-Apps Script)</button>
+      <button class="btn ghost" id="cmpScript"${SEND_URL?' style="display:none"':''}>⚙️ הורדה כקובץ</button>
       <button class="btn ghost" id="cmpReset">איפוס הטיוטה</button>
     </div>
     <div class="sub" style="margin-top:8px">העתקה מעוצבת שומרת את העיצוב ומתאימה לנמען אחד בכל פעם. הסקריפט יוצר <b>טיוטות</b> (ברירת מחדל) או שולח לכל הנבחרים,
@@ -943,51 +946,56 @@ function sendPanelHtml(){
     <div class="sub">שולחים ישר מכאן, בלי סקריפט. המיילים יוצאים מחשבון העבודה של הקמפוס, ותשובות חוזרות אל השולח/ת. קודם שולחים בדיקה לעצמך, ורק אחר כך שליחה.</div>
     <div class="mlgrid" style="margin-top:8px">
       <div><div class="sub">מי שולח/ת (למייל הבדיקה ולתשובות)</div>
-        <select id="sdWho" class="mlin">${people.map(p=>`<option value="${esc(p.mail)}" data-name="${esc(p.name)}">${esc(p.name)} — ${esc(p.mail)}</option>`).join('')}</select></div>
-      <div><div class="sub">קוד שליחה</div><input type="text" id="sdPin" class="mlin" autocomplete="off" autocapitalize="off" spellcheck="false" style="direction:ltr"></div>
+        <select id="sdWho" class="mlin"><option value="">— בחרי מי שולח/ת —</option>${people.map(p=>`<option value="${esc(p.mail)}" data-name="${esc(p.name)}">${esc(p.name)} — ${esc(p.mail)}</option>`).join('')}</select></div>
+      <div><div class="sub">קוד שליחה (נשמר בדפדפן הזה)</div><input type="text" id="sdPin" class="mlin" value="${esc(sdLoadPin())}" autocomplete="off" autocapitalize="off" spellcheck="false" style="direction:ltr"></div>
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
-      <button class="btn" id="sdTest">📨 שליחת בדיקה אליי</button>
-      <button class="btn" id="sdSend" style="background:#b3261e">🚀 שליחה לנבחרים</button>
+      <button class="btn ghost" id="sdTest">📨 שלחי לי רק בדיקה</button>
+      <button class="btn" id="sdSend" style="background:#b3261e">🚀 שלח לכולם</button>
     </div>
     <div id="sdOut" class="sub" style="margin-top:8px"></div></div>`;
 }
+const sdLoadPin=()=>{try{return localStorage.getItem('chemed_sdpin')||''}catch(e){return ''}};
 async function sendDirect(mode){
   const out=document.getElementById('sdOut'), who=document.getElementById('sdWho'), pin=(document.getElementById('sdPin').value||'').trim();
   const sel=cmpSelected();
   if(!sel.length) return alert('בחרי נמען אחד לפחות.');
   if(!cmp.subj.trim()) return alert('חסר נושא למייל.');
+  if(!who||!who.value) return alert('בחרי מי שולח/ת (החתימה והתשובות לפי הבחירה).');
   if(!pin) return alert('הקלידי את קוד השליחה.');
-  if(!who||!who.value) return alert('בחרי מי שולח/ת.');
   if(mode==='send'){
-    if(!confirm('לשלוח עכשיו ל-'+sel.length+' נמענים?\nאי אפשר לבטל שליחה.')) return;
-    if(sel.length>5){
-      const t=prompt('לאישור הקלידי את נושא המייל בדיוק כפי שהוא כתוב:');
-      if(t===null||t.trim()!==cmp.subj.trim()) return alert('האישור לא תואם לנושא. לא נשלח כלום.');
-    }
+    if(!confirm('לשלוח עכשיו ל-'+sel.length+' נמענים?\nאי אפשר לבטל שליחה.\n(תקבלי גם עותק לדוגמה למייל שלך.)')) return;
   }
-  const payload={pin,mode,sender:who.value,senderName:who.options[who.selectedIndex].dataset.name||'',
+  const base={pin,sender:who.value,senderName:who.options[who.selectedIndex].dataset.name||'',
     mails:sel.map(c=>({to:c.mail,name:c.name,subject:cmpFill(cmp.subj,c),html:cmpEmailHtml(c,true),body:cmpPlainFor(c)})),
     img:cmp.img?{name:cmp.img.name,mime:cmp.img.mime,mode:cmp.imgMode,b64:cmp.img.b64}:null};
+  const post=async m=>{const r=await fetch(SEND_URL,{method:'POST',body:JSON.stringify(Object.assign({},base,{mode:m}))}); return r.json();};   // text/plain — בלי preflight
+  const bad=j=>'<b style="color:#b3261e">לא נשלח:</b> '+esc(j.error||'שגיאה')+(j.rejected?'<br>'+j.rejected.map(esc).join(', '):'');
   const btns=['sdTest','sdSend'].map(id=>document.getElementById(id));
-  btns.forEach(b=>b.disabled=true); out.textContent='שולח…';
+  btns.forEach(b=>b.disabled=true);
   try{
-    const r=await fetch(SEND_URL,{method:'POST',body:JSON.stringify(payload)});   // text/plain — בלי preflight
-    const j=await r.json();
-    if(!j.ok){
-      out.innerHTML='<b style="color:#b3261e">לא נשלח:</b> '+esc(j.error||'שגיאה')+(j.rejected?'<br>'+j.rejected.map(esc).join(', '):'');
-    } else if(j.mode==='test'){
-      out.innerHTML='<b style="color:#0b5c40">✓ נשלח מייל בדיקה אל '+esc(j.sentTo)+'.</b> בדקי אותו, ואז לחצי "שליחה לנבחרים".';
+    if(mode==='test'){
+      out.textContent='שולח בדיקה…';
+      const j=await post('test');
+      out.innerHTML=j.ok?'<b style="color:#0b5c40">✓ נשלח מייל בדיקה אל '+esc(j.sentTo)+'.</b>':bad(j);
     } else {
-      out.innerHTML='<b style="color:#0b5c40">✓ נשלחו '+j.sent+' מיילים.</b>'+(j.failed&&j.failed.length?'<br><b style="color:#b3261e">לא הצליחו:</b> '+j.failed.map(esc).join(' · '):'');
+      out.textContent='שולח עותק לדוגמה אליך…';
+      const t=await post('test');
+      if(!t.ok){ out.innerHTML=bad(t); return; }
+      out.textContent='שולח ל-'+sel.length+' נמענים…';
+      const j=await post('send');
+      out.innerHTML=j.ok?'<b style="color:#0b5c40">✓ נשלחו '+j.sent+' מיילים.</b> (עותק לדוגמה נשלח גם אליך.)'+(j.failed&&j.failed.length?'<br><b style="color:#b3261e">לא הצליחו:</b> '+j.failed.map(esc).join(' · '):''):bad(j);
     }
   }catch(e){
-    out.innerHTML='<b style="color:#b3261e">שגיאת תקשורת:</b> '+esc(e.message)+' — בדקי חיבור לאינטרנט ואת כתובת ה-Web App.';
+    out.innerHTML='<b style="color:#b3261e">שגיאת תקשורת:</b> '+esc(e.message)+' — בדקי חיבור לאינטרנט ונסי שוב.';
+  }finally{
+    btns.forEach(b=>b.disabled=false);
   }
-  btns.forEach(b=>b.disabled=false);
 }
 function wireSend(){
   const t=document.getElementById('sdTest'), s=document.getElementById('sdSend');
+  const pinEl=document.getElementById('sdPin'); if(pinEl) pinEl.oninput=()=>{try{localStorage.setItem('chemed_sdpin',pinEl.value)}catch(e){}};
+  const w=document.getElementById('sdWho'); if(w) w.onchange=()=>cmpRefreshPrev();   /* החתימה בתצוגה מתעדכנת לפי השולח/ת */
   if(t) t.onclick=()=>sendDirect('test');
   if(s) s.onclick=()=>sendDirect('send');
 }
@@ -1149,7 +1157,7 @@ function wireCompose(){
     setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},400);};
   document.getElementById('cmpReset').onclick=()=>{
     if(!confirm('לאפס את הטיוטה (נושא, גוף ובחירת נמענים)?')) return;
-    cmp=Object.assign({},{subj:'',title:'קמפוס חמ"ד תשפ"ז',theme:'navy',sign:'צוות קמפוס חמ"ד',
+    cmp=Object.assign({},{subj:'',title:'קמפוס חמ"ד תשפ"ז',theme:'navy',sign:'{שולח}',
       html:'<p>שלום {שם פרטי},</p><p>כאן כותבים את תוכן המייל.</p>',sel:[],q:'',pv:'',img:null,imgMode:'inline'});
     cmpSave(); render();};
   wireSend();
@@ -1264,7 +1272,10 @@ function sha256hex(msg){
   }
   return h.map(x=>(x>>>0).toString(16).padStart(8,'0')).join('');
 }
-function unlocked(){ try{ return sessionStorage.getItem('chemedView')==='1'; }catch(e){ return false; } }
+function unlocked(){
+  try{ if(sessionStorage.getItem('chemedView')==='1') return true; }catch(e){}
+  try{ return Number(localStorage.getItem('chemedViewUntil')||0)>Date.now(); }catch(e){ return false; }   /* נשמר 30 יום במכשיר */
+}
 function showGate(){
   const ov=document.createElement('div');
   ov.style.cssText='position:fixed;inset:0;z-index:9999;background:#f4f5fb;display:flex;align-items:center;justify-content:center;padding:16px';
@@ -1281,6 +1292,7 @@ function showGate(){
     let ok=false; try{ ok=sha256hex(inp.value.trim())===PW_HASH; }catch(x){ err.textContent='הדפדפן לא תומך בבדיקת סיסמה'; return; }
     if(!ok){ err.textContent='סיסמה שגויה'; inp.select(); return; }
     try{ sessionStorage.setItem('chemedView','1'); }catch(x){}
+    try{ localStorage.setItem('chemedViewUntil',String(Date.now()+30*864e5)); }catch(x){}
     ov.remove(); boot(); };
 }
 if(unlocked()) boot(); else showGate();
