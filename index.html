@@ -927,7 +927,7 @@ function vCompose(){
         return `<button class="btn ghost mini" data-cmpslot="${sl.id}">${esc(sl.label)} · <span class="ltr">${sl.time}</span>${dayOf(sl)} (${n})</button>`;}).join('')}
     </div>
     <div style="margin-top:8px;font-weight:700;color:var(--brand)" id="cmpCount"></div>
-    <details style="margin-top:6px"><summary class="sub" style="cursor:pointer">בחירה לפי שמות (אופציונלי)</summary>
+    <details open style="margin-top:10px"><summary class="sub" style="cursor:pointer;font-weight:700">בחירה לפי שמות (אפשר לסמן אנשים ספציפיים)</summary>
       <input type="text" id="cmpQ" class="mlin" style="margin-top:8px" placeholder="חיפוש שם / תפקיד / בית ספר" value="${esc(cmp.q)}">
       <div class="cmp-list" id="cmpList">${cmpListHtml()}</div>
       <div class="sub" style="margin-top:6px">${withMail} מתוך ${pool.length} אנשים עם כתובת מייל. למי שאין כתובת לא נשלח.</div>
