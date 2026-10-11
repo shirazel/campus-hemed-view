@@ -838,7 +838,9 @@ function cmpPlain(h){
     .replace(/<li[^>]*>/gi,'• $&').replace(/<\/(p|div|h[1-6]|li|ul|ol)>/gi,'\n$&'),'text/html');
   return d.body.textContent.replace(/\n{3,}/g,'\n\n').trim();
 }
-const cmpFirst=c=>(c.name||'').replace(/\s+/g,' ').trim();   /* השדה {שם פרטי} מחזיר את השם המלא (כולל תואר, למשל "הרב תומר כספי") */
+/* {שם פרטי} = שם פרטי בלי תואר ("הרב תומר כספי" ← "תומר"); {שם} = השם המלא כולל תואר */
+const CMP_TITLES=/^(הרב|הרבנית|ד"ר|דר'|ד״ר|פרופ'|פרופסור|מר|גב'|גברת|הגר"ר|הרב"ד|הרה"ג)$/;
+const cmpFirst=c=>{const t=String(c.name||'').replace(/\s+/g,' ').trim().split(' '); let i=0; while(i<t.length-1&&CMP_TITLES.test(t[i])) i++; return t[i]||c.name;};
 const cmpFill=(s,c)=>String(s).replace(/\{שם פרטי\}/g,cmpFirst(c)).replace(/\{שם\}/g,c.name).replace(/\{שיוך\}/g,c.role).replace(/\{רצועות\}/g,c.slots||cmpAllSlots());
 const cmpFillH=(s,c)=>String(s).replace(/\{שם פרטי\}/g,esc(cmpFirst(c))).replace(/\{שם\}/g,esc(c.name)).replace(/\{שיוך\}/g,esc(c.role)).replace(/\{רצועות\}/g,esc(c.slots||cmpAllSlots()));
 /* חתימה = שם השולח/ת שנבחר בסעיף "שליחה ישירה". {שולח} מוחלף בשמו; כשלא נבחר איש — "צוות קמפוס חמ\"ד" */
@@ -954,7 +956,8 @@ function vCompose(){
       <button class="btn ghost mini" data-cmd="insertUnorderedList">• רשימה</button>
       <button class="btn ghost mini" data-cmd="link">🔗 קישור</button>
       <span style="margin-inline-start:auto" class="sub">הוספה אוטומטית:</span>
-      <button class="btn mini" data-fld="{שם}">שם</button>
+      <button class="btn mini" data-fld="{שם פרטי}">שם פרטי</button>
+      <button class="btn mini" data-fld="{שם}">שם מלא</button>
       <button class="btn mini" data-fld="{רצועות}">רצועות</button>
     </div>
     <div class="cmp-ed" id="cmpEd" contenteditable="true" dir="rtl">${cmpClean(cmp.html)}</div>
@@ -1290,7 +1293,8 @@ function vTeacher(){
       <button class="btn ghost mini" data-cmd="insertUnorderedList">• רשימה</button>
       <button class="btn ghost mini" data-cmd="link">🔗 קישור</button>
       <span style="margin-inline-start:auto" class="sub">הוספה אוטומטית:</span>
-      <button class="btn mini" data-fld="{שם}">שם</button>
+      <button class="btn mini" data-fld="{שם פרטי}">שם פרטי</button>
+      <button class="btn mini" data-fld="{שם}">שם מלא</button>
       <button class="btn mini" data-fld="{שיוך}">שם בית הספר</button>
     </div>
     <div class="cmp-ed" id="cmpEd" contenteditable="true" dir="rtl">${cmpClean(cmp.html)}</div>
