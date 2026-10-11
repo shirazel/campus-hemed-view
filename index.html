@@ -847,7 +847,7 @@ function cmpWaLink(phone){
   return 'https://wa.me/'+d;
 }
 const cmpSignIsDefault=()=>!cmp.sign||cmp.sign==='צוות קמפוס חמ"ד'||cmp.sign==='שירה'||String(cmp.sign).trim()==='{שולח}';
-function cmpSignRole(s){ return s.role||'צוות ניהול קמפוס חמ"ד'; }
+function cmpSignRole(s){ const r=String(s.role||'').trim(); return (!r||r==='צוות ניהול')?'צוות ניהול קמפוס חמ"ד':r; }   /* "צוות ניהול" לבד = ברירת המחדל */
 function cmpSignBlockFor(forScript){
   const s=cmpSenderInfo(), name=s.name||'צוות קמפוס חמ"ד', role=cmpSignRole(s), wa=cmpWaLink(s.phone);
   const lk='style="color:#1d4f9f;text-decoration:none;font-weight:bold"';
@@ -902,70 +902,80 @@ function cmpPreviewHtml(){
 function vCompose(){
   const pool=cmpPool(), withMail=pool.filter(cmpOk).length;
   const grps=[...new Set(pool.map(p=>p.grp))];
-  return `<div class="card"><h2>ניסוח מייל חופשי</h2>
-    <div class="sub">כותבים פעם אחת, והמייל מותאם אישית לכל נמען: <b>{שם}</b> · <b>{שם פרטי}</b> · <b>{שיוך}</b>
-      (קורס למורה, בית ספר למוביל). אפשר לבחור איש ספציפי, קבוצה שלמה או את כולם.</div>
-    <h3>1. למי לשלוח</h3>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-      <button class="btn ghost mini" data-cmpgrp="__all">✓ כולם</button>
-      ${grps.map(g=>`<button class="btn ghost mini" data-cmpgrp="${esc(g)}">${esc(g)}</button>`).join('')}
-      <button class="btn ghost mini" data-cmpgrp="__none">נקה בחירה</button>
-      <input type="text" id="cmpQ" class="mlin" style="flex:1;min-width:200px;width:auto" placeholder="חיפוש שם / תפקיד / בית ספר" value="${esc(cmp.q)}">
-    </div>
-    <div class="sub" style="margin-top:8px" id="cmpCount"></div>
-    <div class="cmp-list" id="cmpList">${cmpListHtml()}</div>
-    <div class="sub" style="margin-top:6px">${withMail} מתוך ${pool.length} אנשים עם כתובת מייל. מי שאין לו כתובת מסומן ולא ניתן לבחירה.</div>
+  const people=pool.filter(p=>p.grp==='צוות ניהול'&&cmpOk(p));
+  const step=(n,t)=>`<div style="display:flex;align-items:center;gap:9px;margin:22px 0 9px"><span style="background:var(--brand);color:#fff;border-radius:50%;width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex:none">${n}</span><b style="font-size:15.5px">${t}</b></div>`;
+  return `<div class="card"><h2>✉️ שליחת מייל</h2>
+    <div class="sub">מלמעלה למטה: ממי, למי, מה כותבים, ושולחים.</div>
 
-    <h3>2. הניסוח והעיצוב</h3>
+    ${step(1,'ממי נשלח המייל?')}
     <div class="mlgrid">
-      <div><div class="sub">נושא המייל</div><input type="text" id="cmpSubj" class="mlin" value="${esc(cmp.subj)}" placeholder="למשל: עדכון חשוב לקראת פתיחת הקמפוס"></div>
-      <div><div class="sub">עיצוב</div><select id="cmpTheme" class="mlin">${Object.keys(CMP_THEMES).map(k=>
-        `<option value="${k}" ${cmp.theme===k?'selected':''}>${CMP_THEMES[k].n}</option>`).join('')}</select></div>
+      <div><div class="sub">השם שיופיע בחתימה ובו יחזרו התשובות</div>
+        <select id="sdWho" class="mlin"><option value="">— בחרו מי שולח/ת —</option>${people.map(p=>`<option value="${esc(p.mail)}" data-name="${esc(p.name)}" data-role="${esc(p.sigRole||p.role||'')}" data-phone="${esc(p.phone||'')}">${esc(p.name)}</option>`).join('')}</select></div>
+      <div><div class="sub">קוד שליחה (נשמר במחשב הזה)</div><input type="text" id="sdPin" class="mlin" value="${esc(sdLoadPin())}" autocomplete="off" autocapitalize="off" spellcheck="false" style="direction:ltr"></div>
     </div>
-    <div class="mlgrid" style="margin-top:8px">
-      <div><div class="sub">טקסט הכותרת הצבעונית</div><input type="text" id="cmpTitle" class="mlin" value="${esc(cmp.title)}"></div>
-      <div><div class="sub">חתימה (‏{שולח}‏ = שם השולח/ת שנבחר למטה בסעיף 4)</div><input type="text" id="cmpSign" class="mlin" value="${esc((!cmp.sign||cmp.sign==='שירה'||cmp.sign==='צוות קמפוס חמ"ד')?'{שולח}':cmp.sign)}"></div>
+
+    ${step(2,'למי לשלוח?')}
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      ${grps.map(g=>`<button class="btn" data-cmpgrp="${esc(g)}">${esc(g)}</button>`).join('')}
+      <button class="btn" data-cmpgrp="__all">כולם</button>
+      <button class="btn ghost" data-cmpgrp="__none">ניקוי בחירה</button>
     </div>
+    <div style="margin-top:8px;font-weight:700;color:var(--brand)" id="cmpCount"></div>
+    <details style="margin-top:6px"><summary class="sub" style="cursor:pointer">בחירה לפי שמות (אופציונלי)</summary>
+      <input type="text" id="cmpQ" class="mlin" style="margin-top:8px" placeholder="חיפוש שם / תפקיד / בית ספר" value="${esc(cmp.q)}">
+      <div class="cmp-list" id="cmpList">${cmpListHtml()}</div>
+      <div class="sub" style="margin-top:6px">${withMail} מתוך ${pool.length} אנשים עם כתובת מייל. למי שאין כתובת לא נשלח.</div>
+    </details>
+
+    ${step(3,'מה כותבים?')}
+    <div class="sub">נושא המייל</div>
+    <input type="text" id="cmpSubj" class="mlin" value="${esc(cmp.subj)}" placeholder="למשל: עדכון חשוב לקראת פתיחת הקמפוס">
+    <div class="sub" style="margin-top:10px">תוכן (אפשר להוסיף שם פרטי או רצועות, והמייל יותאם לכל אחד):</div>
     <div class="cmp-tb" id="cmpTb">
       <button class="btn ghost mini" data-cmd="bold"><b>B</b></button>
-      <button class="btn ghost mini" data-cmd="italic"><i>I</i></button>
-      <button class="btn ghost mini" data-cmd="underline"><u>U</u></button>
-      <button class="btn ghost mini" data-cmd="formatBlock" data-arg="h3">כותרת</button>
-      <button class="btn ghost mini" data-cmd="formatBlock" data-arg="p">פסקה</button>
       <button class="btn ghost mini" data-cmd="insertUnorderedList">• רשימה</button>
-      <button class="btn ghost mini" data-cmd="insertOrderedList">1. מספור</button>
       <button class="btn ghost mini" data-cmd="link">🔗 קישור</button>
-      <label class="btn ghost mini" style="cursor:pointer">🎨 צבע <input type="color" id="cmpColor" value="#3b4a9e" style="width:22px;height:18px;border:0;padding:0;vertical-align:middle"></label>
-      <button class="btn ghost mini" data-cmd="removeFormat">ניקוי עיצוב</button>
-      <span style="margin-inline-start:auto" class="sub">הוספת שדה אישי:</span>
+      <span style="margin-inline-start:auto" class="sub">הוספה אוטומטית:</span>
       <button class="btn mini" data-fld="{שם פרטי}">שם פרטי</button>
-      <button class="btn mini" data-fld="{שם}">שם מלא</button>
-      <button class="btn mini" data-fld="{שיוך}">שיוך</button>
       <button class="btn mini" data-fld="{רצועות}">רצועות</button>
     </div>
     <div class="cmp-ed" id="cmpEd" contenteditable="true" dir="rtl">${cmpClean(cmp.html)}</div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px">
-      <b>🖼️ תמונה</b>
+      <b>🖼️ תמונה (אופציונלי)</b>
       <input type="file" id="cmpImg" accept="image/*">
-      <select id="cmpImgMode" class="mlin" style="width:auto"><option value="inline" ${cmp.imgMode!=='attach'?'selected':''}>בתוך גוף המייל</option><option value="attach" ${cmp.imgMode==='attach'?'selected':''}>כקובץ מצורף</option></select>
+      <select id="cmpImgMode" class="mlin" style="width:auto"><option value="inline" ${cmp.imgMode!=='attach'?'selected':''}>בתוך המייל</option><option value="attach" ${cmp.imgMode==='attach'?'selected':''}>כקובץ מצורף</option></select>
       <button class="btn ghost mini" id="cmpImgDel">הסרת תמונה</button>
       <span class="sub" id="cmpImgInfo">${cmp.img?esc(cmp.img.name)+' · '+Math.round(cmp.img.b64.length*0.75/1024)+' KB':'לא נבחרה תמונה'}</span>
     </div>
-    <div class="sub" style="margin-top:4px">התמונה מוקטנת אוטומטית (עד 1200 פיקסלים) ונכנסת לסקריפט Gmail בלבד. בתמונה אין שמירה בדפדפן, ובכל סשן בוחרים אותה מחדש.</div>
-  </div>
-  <div class="card"><h2>3. תצוגה מקדימה ושליחה</h2>
+
+    ${step(4,'בדיקה ושליחה')}
     <div id="cmpPrev">${cmpPreviewHtml()}</div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
-      <button class="btn" id="cmpCopy">📋 העתקה מעוצבת (להדבקה בג'ימייל)</button>
-      <a class="btn ghost" id="cmpMailto" style="text-decoration:none" target="_blank" rel="noopener">✉️ פתיחה במייל (טקסט בלבד)</a>
-      <button class="btn" id="cmpScriptCopy"${SEND_URL?' style="display:none"':''}>📋 העתקת הסקריפט (להדבקה ב-Apps Script)</button>
-      <button class="btn ghost" id="cmpScript"${SEND_URL?' style="display:none"':''}>⚙️ הורדה כקובץ</button>
-      <button class="btn ghost" id="cmpReset">איפוס הטיוטה</button>
+    ${SEND_URL?`<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;align-items:center">
+      <button class="btn" id="sdSend" style="background:#b3261e;font-size:15px;padding:11px 20px">🚀 שלח לכולם</button>
+      <button class="btn ghost" id="sdTest">📨 שלחו לי רק בדיקה</button>
+      <button class="btn ghost" id="cmpReset" style="margin-inline-start:auto">🗑️ מחיקת הטיוטה והתחלה מחדש</button>
     </div>
-    <div class="sub" style="margin-top:8px">העתקה מעוצבת שומרת את העיצוב ומתאימה לנמען אחד בכל פעם. הסקריפט יוצר <b>טיוטות</b> (ברירת מחדל) או שולח לכל הנבחרים,
-      מהחשבון שמחובר בגוגל בזמן ההרצה. "פתיחה במייל" שולחת טקסט פשוט בלי העיצוב.</div>
-  </div>
-  ${sendPanelHtml()}`;
+    <div class="sub" style="margin-top:6px">"שלח לכולם" שולח קודם עותק לדוגמה לשולח/ת, ואחר כך לכל הנבחרים.</div>
+    <div id="sdOut" style="margin-top:8px;font-size:13.5px"></div>`
+    :`<div class="note" style="margin-top:12px">השליחה הישירה עדיין לא הופעלה.</div><button class="btn ghost" id="cmpReset" style="margin-top:8px">🗑️ מחיקת הטיוטה והתחלה מחדש</button>`}
+
+    <details style="margin-top:18px"><summary class="sub" style="cursor:pointer">אפשרויות מתקדמות (לא חובה)</summary>
+      <div class="mlgrid" style="margin-top:8px">
+        <div><div class="sub">עיצוב המייל</div><select id="cmpTheme" class="mlin">${Object.keys(CMP_THEMES).map(k=>
+          `<option value="${k}" ${cmp.theme===k?'selected':''}>${CMP_THEMES[k].n}</option>`).join('')}</select></div>
+        <div><div class="sub">טקסט הכותרת הצבעונית</div><input type="text" id="cmpTitle" class="mlin" value="${esc(cmp.title)}"></div>
+      </div>
+      <div style="margin-top:8px"><div class="sub">חתימה (‏{שולח}‏ = השולח/ת שנבחר/ה למעלה, עם לוגו ופרטים)</div>
+        <input type="text" id="cmpSign" class="mlin" value="${esc((!cmp.sign||cmp.sign==='שירה'||cmp.sign==='צוות קמפוס חמ"ד')?'{שולח}':cmp.sign)}"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center">
+        <label class="btn ghost mini" style="cursor:pointer">🎨 צבע טקסט <input type="color" id="cmpColor" value="#3b4a9e" style="width:22px;height:18px;border:0;padding:0;vertical-align:middle"></label>
+        <button class="btn ghost mini" id="cmpCopy">📋 העתקה מעוצבת</button>
+        <a class="btn ghost mini" id="cmpMailto" style="text-decoration:none" target="_blank" rel="noopener">✉️ פתיחה בתוכנת המייל</a>
+        <button class="btn ghost mini" id="cmpScriptCopy">📋 העתקת סקריפט Gmail</button>
+        <button class="btn ghost mini" id="cmpScript">⚙️ הורדת סקריפט</button>
+      </div>
+    </details>
+  </div>`;
 }
 /* ---------- שליחה ישירה (Web App) — נוסף 7.10.2026 ----------
    שולח ישר מהדף דרך סקריפט Apps Script שנפרס פעם אחת (שליחה-ישירה-WebApp.gs). דורש קוד שליחה (PIN),
@@ -978,7 +988,7 @@ function sendPanelHtml(){
     <div class="sub">שולחים ישר מכאן, בלי סקריפט. המיילים יוצאים מחשבון העבודה של הקמפוס, ותשובות חוזרות אל השולח/ת. קודם שולחים בדיקה לעצמך, ורק אחר כך שליחה.</div>
     <div class="mlgrid" style="margin-top:8px">
       <div><div class="sub">מי שולח/ת (למייל הבדיקה ולתשובות)</div>
-        <select id="sdWho" class="mlin"><option value="">— בחרי מי שולח/ת —</option>${people.map(p=>`<option value="${esc(p.mail)}" data-name="${esc(p.name)}" data-role="${esc(p.sigRole||'')}" data-phone="${esc(p.phone||'')}">${esc(p.name)} — ${esc(p.mail)}</option>`).join('')}</select></div>
+        <select id="sdWho" class="mlin"><option value="">— בחרי מי שולח/ת —</option>${people.map(p=>`<option value="${esc(p.mail)}" data-name="${esc(p.name)}" data-role="${esc(p.sigRole||p.role||'')}" data-phone="${esc(p.phone||'')}">${esc(p.name)} — ${esc(p.mail)}</option>`).join('')}</select></div>
       <div><div class="sub">קוד שליחה (נשמר בדפדפן הזה)</div><input type="text" id="sdPin" class="mlin" value="${esc(sdLoadPin())}" autocomplete="off" autocapitalize="off" spellcheck="false" style="direction:ltr"></div>
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
@@ -1254,7 +1264,7 @@ async function boot(quiet){
     const prevA=ASSIGN_MAP, prevT=TEAM;
     ASSIGN_MAP=await getAssignMap();
     TEAM=await getTeam();
-    { const tt=teamFromContacts(); if(tt.length) TEAM=tt; }
+    { const tt=teamFromContacts(); if(tt.length) TEAM=tt; }   /* מקור הצוות: לשונית "אנשי קשר מסודר" (שורות מסוג "צוות ניהול"); הלשונית הישנה "צוות ניהול" רק כגיבוי */
     if(quiet){
       if(!Object.keys(ASSIGN_MAP).length && Object.keys(prevA).length) ASSIGN_MAP=prevA;
       if(!TEAM.length && prevT.length) TEAM=prevT;
