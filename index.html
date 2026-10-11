@@ -1254,12 +1254,15 @@ function wireCompose(){
 /* ================= מצב מורים: index.html?teachers (7.10.2026) =================
    דף שליחה נפרד למורים באותו קובץ: בלי לשוניות ובלי דף הניהול. מורה בוחר את שמו, ורואה רק את בתי הספר
    (מובילים) של הרצועות שהוא מלמד בהן. השרת מאפשר למורים לשלוח רק לאנשי קשר של בתי ספר. */
+const ICON_MAIL=`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><defs><linearGradient id='mbg' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#8d9bff'/><stop offset='1' stop-color='#2c3aa0'/></linearGradient><linearGradient id='body' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#ffffff'/><stop offset='1' stop-color='#cfd6ff'/></linearGradient><linearGradient id='flap' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#ffffff'/><stop offset='1' stop-color='#b9c3ff'/></linearGradient><radialGradient id='seal' cx='.35' cy='.3' r='.8'><stop offset='0' stop-color='#ff8fb1'/><stop offset='1' stop-color='#e0245e'/></radialGradient><linearGradient id='sheen' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#fff' stop-opacity='.55'/><stop offset='1' stop-color='#fff' stop-opacity='0'/></linearGradient></defs><rect x='2' y='2' width='60' height='60' rx='15' fill='url(#mbg)'/><path d='M2 17a15 15 0 0 1 15-15h30a15 15 0 0 1 15 15v10C48 35 16 35 2 27z' fill='url(#sheen)'/><ellipse cx='32' cy='52' rx='19' ry='3.2' fill='#0b1654' opacity='.35'/><rect x='9' y='21' width='46' height='29' rx='4' fill='url(#body)'/><path d='M9 47l15-12M55 47L40 35' stroke='#a9b4f2' stroke-width='1.4' stroke-linecap='round' fill='none'/><rect x='9' y='46' width='46' height='4' rx='2' fill='#9aa6ec' opacity='.55'/><path d='M9 24c0-1.7 1.3-3 3-3h40c1.7 0 3 1.3 3 3L32 40z' fill='url(#flap)'/><path d='M12 21h40c1.7 0 3 1.3 3 3L32 40 9 24c0-1.7 1.3-3 3-3z' fill='none' stroke='#8f9cec' stroke-width='1.2' stroke-linejoin='round'/><circle cx='32' cy='38' r='6' fill='url(#seal)'/><circle cx='29.8' cy='35.8' r='1.7' fill='#fff' opacity='.6'/><path d='M32 41.2c-3-2.1-3.8-3.4-3.8-4.5 0-1 .8-1.6 1.7-1.6.8 0 1.5.5 2.1 1.3.6-.8 1.3-1.3 2.1-1.3.9 0 1.7.6 1.7 1.6 0 1.1-.8 2.4-3.8 4.5z' fill='#fff'/><path d='M52 8l1.7 4.3L58 14l-4.3 1.7L52 20l-1.7-4.3L46 14l4.3-1.7z' fill='#ffe27a' stroke='#f0b400' stroke-width='.6'/></svg>`;
+const ICON_LOCK=`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><defs><linearGradient id='lbg' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#8d9bff'/><stop offset='1' stop-color='#2c3aa0'/></linearGradient><linearGradient id='lgold' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#ffe27a'/><stop offset='1' stop-color='#f09a00'/></linearGradient><linearGradient id='lsteel' x1='0' y1='0' x2='1' y2='0'><stop offset='0' stop-color='#ffffff'/><stop offset='.5' stop-color='#c9d0ee'/><stop offset='1' stop-color='#8f9bd4'/></linearGradient><linearGradient id='lsheen' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#fff' stop-opacity='.55'/><stop offset='1' stop-color='#fff' stop-opacity='0'/></linearGradient></defs><rect x='2' y='2' width='60' height='60' rx='15' fill='url(#lbg)'/><path d='M2 17a15 15 0 0 1 15-15h30a15 15 0 0 1 15 15v10C48 35 16 35 2 27z' fill='url(#lsheen)'/><ellipse cx='32' cy='55' rx='17' ry='3' fill='#0b1654' opacity='.35'/><path d='M22 31v-7a10 10 0 0 1 20 0v7' fill='none' stroke='#5560a8' stroke-width='7.5' stroke-linecap='round'/><path d='M22 31v-7a10 10 0 0 1 20 0v7' fill='none' stroke='url(#lsteel)' stroke-width='5' stroke-linecap='round'/><rect x='14' y='30' width='36' height='25' rx='7' fill='#c77700'/><rect x='14' y='28.5' width='36' height='25' rx='7' fill='url(#lgold)'/><path d='M17 33c0-2.5 2-4.5 4.5-4.5h21c2.5 0 4.5 2 4.5 4.5v1H17z' fill='#fff' opacity='.35'/><circle cx='32' cy='38.5' r='4' fill='#6b3f00'/><path d='M30.2 40.5h3.6l1 7h-5.6z' fill='#6b3f00'/><circle cx='31' cy='37.3' r='1.2' fill='#fff' opacity='.6'/><path d='M53 9l1.6 4 4 1.6-4 1.6L53 20l-1.6-3.8-4-1.6 4-1.6z' fill='#ffe27a' stroke='#f0b400' stroke-width='.6'/></svg>`;
+const iconBox=(svg,px)=>`<div style="width:${px}px;height:${px}px;margin:0 auto;filter:drop-shadow(0 6px 10px rgba(40,50,110,.28))">${svg.replace('<svg ','<svg width=\'100%\' height=\'100%\' ')}</div>`;
 const TEACHER_MODE=/[?&]teachers\b/.test(location.search);
 function tcStep(n,t){ return `<div style="display:flex;align-items:center;gap:9px;margin:22px 0 9px"><span style="background:var(--brand);color:#fff;border-radius:50%;width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex:none">${n}</span><b style="font-size:15.5px">${t}</b></div>`; }
 function vTeacher(){
   const me=(()=>{try{return localStorage.getItem('chemed_tc_me')||''}catch(e){return ''}})().toLowerCase();
   const ts=TEACHERS.filter(t=>t.email&&t.email.includes('@')).sort((a,b)=>a.name.localeCompare(b.name,'he'));
-  return `<div class="card"><h2>✉️ דף קשר — מובילי הקמפוס</h2>
+  return `<div class="card"><div style="display:flex;align-items:center;gap:12px"><div style="width:54px;flex:none;filter:drop-shadow(0 4px 7px rgba(40,50,110,.25))">${ICON_MAIL.replace('<svg ',"<svg width='100%' ")}</div><h2 style="margin:0">דף קשר — מובילי הקמפוס</h2></div>
     <div class="sub">קמפוס חמ"ד — שליחת הודעה למובילי בתי הספר שנמצאים איתך ברצועה.</div>
 
     ${tcStep(1,'מי את/ה?')}
@@ -1348,19 +1351,22 @@ async function teacherEntry(){
   document.title='✉️ דף קשר — מובילי הקמפוס';
   const tb=document.querySelector('.topbar'); if(tb) tb.style.display='none';
   const nv=document.getElementById('nav'); if(nv) nv.style.display='none';
-  const check=async pin=>{ try{ const r=await fetch(SEND_URL,{method:'POST',body:JSON.stringify({pin,mode:'check',role:'teacher'})}); const j=await r.json(); return j.ok?'':(j.error||'שגיאה'); }catch(e){ return 'שגיאת תקשורת — בדקו חיבור לאינטרנט'; } };
+  const check=async pin=>{ try{ const r=await Promise.race([fetch(SEND_URL,{method:'POST',body:JSON.stringify({pin,mode:'check',role:'teacher'})}),new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),15000))]); const j=await r.json(); return j.ok?'':(j.error||'שגיאה'); }catch(e){ return e.message==='timeout'?'השרת לא ענה בזמן. נסו שוב בעוד רגע.':'שגיאת תקשורת — בדקו חיבור לאינטרנט'; } };
   const saved=sdLoadPin();
-  if(saved && !(await check(saved))){ boot(); return; }
   const ov=document.createElement('div');
   ov.style.cssText='position:fixed;inset:0;z-index:9999;background:#f4f5fb;display:flex;align-items:center;justify-content:center;padding:16px';
   ov.innerHTML='<form style="background:#fff;border:1px solid #dfe2f0;border-radius:16px;padding:26px 24px;width:100%;max-width:340px;text-align:center;box-shadow:0 8px 30px rgba(40,50,110,.12)">'
-    +'<div style="font-size:30px">✉️</div><h2 style="margin:6px 0 4px;font-size:18px">דף קשר — מובילי הקמפוס</h2>'
+    +iconBox(ICON_MAIL,84)+'<h2 style="margin:10px 0 4px;font-size:18px">דף קשר — מובילי הקמפוס</h2>'
     +'<div style="font-size:13px;color:#667;margin-bottom:14px">הקלידו את קוד השליחה כדי להיכנס.</div>'
     +'<input type="text" id="tcPin" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="קוד שליחה" style="width:100%;box-sizing:border-box;padding:10px 12px;font:inherit;border:1px solid #cfd3e6;border-radius:10px;text-align:center;direction:ltr">'
     +'<div id="tcErr" style="color:#b3261e;font-size:12.5px;min-height:18px;margin:6px 0"></div>'
     +'<button class="btn" style="width:100%;padding:10px;border-radius:10px">כניסה</button></form>';
   document.body.appendChild(ov);
   const f=ov.querySelector('form'), inp=ov.querySelector('#tcPin'), er=ov.querySelector('#tcErr'); inp.focus();
+  if(saved){ inp.value=saved; er.style.color='#667'; er.textContent='בודק את הקוד השמור…';
+    const m0=await check(saved); er.style.color='#b3261e';
+    if(!m0){ ov.remove(); boot(); return; }
+    er.textContent=m0; }
   f.onsubmit=async e=>{ e.preventDefault(); er.textContent='בודק…';
     const m=await check(inp.value.trim());
     if(m){ er.textContent=m; inp.select(); return; }
@@ -1498,7 +1504,7 @@ function showGate(){
   const ov=document.createElement('div');
   ov.style.cssText='position:fixed;inset:0;z-index:9999;background:#f4f5fb;display:flex;align-items:center;justify-content:center;padding:16px';
   ov.innerHTML='<form style="background:#fff;border:1px solid #dfe2f0;border-radius:16px;padding:26px 24px;width:100%;max-width:340px;text-align:center;box-shadow:0 8px 30px rgba(40,50,110,.12)">'
-    +'<div style="font-size:30px">🔒</div><h2 style="margin:6px 0 4px;font-size:18px">קמפוס חמ"ד — דף צפייה</h2>'
+    +iconBox(ICON_LOCK,84)+'<h2 style="margin:10px 0 4px;font-size:18px">קמפוס חמ"ד — דף צפייה</h2>'
     +'<div style="font-size:13px;color:#667;margin-bottom:14px">דף פנימי לצוות הניהול. הקלידי סיסמה כדי להיכנס.</div>'
     +'<input type="text" id="pwIn" name="chemed-code" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="סיסמה" style="width:100%;box-sizing:border-box;padding:10px 12px;font:inherit;border:1px solid #cfd3e6;border-radius:10px;text-align:center;direction:ltr">'
     +'<div id="pwErr" style="color:#b3261e;font-size:12.5px;min-height:18px;margin:6px 0"></div>'
