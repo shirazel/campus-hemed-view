@@ -34,6 +34,10 @@ h3{font-size:13.5px;margin:16px 0 7px;font-weight:700;color:var(--brand)}
 .cmp-row{display:flex;gap:8px;align-items:center;padding:6px 12px;border-bottom:1px solid var(--line);cursor:pointer;flex-wrap:wrap}
 .cmp-row.off{opacity:.55;cursor:default}
 .cmp-gh{background:var(--brand-soft);color:var(--brand);font-weight:700;font-size:12.5px;padding:5px 12px;position:sticky;top:0}
+.btn.cmp-on{background:var(--brand)!important;color:#fff!important;border-color:var(--brand)!important;box-shadow:0 0 0 2px rgba(59,74,156,.25)}
+.cmp-chosen{position:sticky;top:0;z-index:6;background:#fff;border:2px solid var(--brand);border-radius:12px;padding:8px 12px;margin:10px 0;box-shadow:0 4px 14px rgba(40,50,110,.18)}
+.cmp-chip{display:inline-flex;align-items:center;gap:4px;background:var(--brand-soft);color:var(--brand);border-radius:99px;padding:2px 4px 2px 10px;margin:2px;font-size:12.5px;font-weight:600}
+.cmp-chip button{border:0;background:transparent;color:var(--brand);cursor:pointer;font-size:15px;line-height:1;padding:0 4px}
 .cmp-prev{background:#f5f6fb;border-radius:10px;padding:12px;overflow:auto;margin-top:10px}
 .mlin{width:100%;border:1px solid var(--line);border-radius:10px;padding:9px 10px;
   font-size:13px;line-height:1.6;background:#fff;color:var(--ink);resize:vertical;
@@ -941,7 +945,8 @@ function vCompose(){
       <button class="btn ghost mini" data-cmpsch="${sl.id}" data-cmpgen="בנים">בנים (${cmpSchoolSlotIds(pool,sl.id,'בנים').length})</button>
       <button class="btn ghost mini" data-cmpsch="${sl.id}" data-cmpgen="בנות">בנות (${cmpSchoolSlotIds(pool,sl.id,'בנות').length})</button>
     </div>`).join('')}
-    <div style="margin-top:8px;font-weight:700;color:var(--brand)" id="cmpCount"></div>
+    <div class="cmp-chosen"><div style="font-weight:700;color:var(--brand)" id="cmpCount"></div>
+      <div id="cmpChosen" style="max-height:92px;overflow:auto;margin-top:4px"></div></div>
     <details open style="margin-top:10px"><summary class="sub" style="cursor:pointer;font-weight:700">בחירה לפי שמות (אפשר לסמן אנשים ספציפיים)</summary>
       <input type="text" id="cmpQ" class="mlin" style="margin-top:8px" placeholder="חיפוש שם / תפקיד / בית ספר" value="${esc(cmp.q)}">
       <div class="cmp-list" id="cmpList">${cmpListHtml()}</div>
@@ -1137,6 +1142,19 @@ function cmpRefresh(){
   const l=document.getElementById('cmpList'); if(!l) return;
   l.innerHTML=cmpListHtml(); cmpBindList(); cmpRefreshPrev();
 }
+/* מדגיש כפתורים שנבחרו ומציג את הנבחרים בתיבה הצמודה */
+function cmpHighlight(){
+  const pool=cmpPool(), sel=new Set(cmpSelected().map(p=>p.id)), n=sel.size;
+  const all=ids=>ids.length>0&&ids.every(i=>sel.has(i)), same=ids=>ids.length>0&&ids.length===n&&all(ids);
+  document.querySelectorAll('[data-cmpgrp]').forEach(b=>{const g=b.dataset.cmpgrp;
+    b.classList.toggle('cmp-on', g!=='__none'&&all(pool.filter(x=>cmpOk(x)&&(g==='__all'||x.grp===g)).map(x=>x.id)));});
+  document.querySelectorAll('[data-cmpslot]').forEach(b=>b.classList.toggle('cmp-on',same(cmpSlotGenIds(pool,+b.dataset.cmpslot,b.dataset.cmpgen||''))));
+  document.querySelectorAll('[data-cmpsch]').forEach(b=>b.classList.toggle('cmp-on',same(cmpSchoolSlotIds(pool,+b.dataset.cmpsch,b.dataset.cmpgen||''))));
+  const box=document.getElementById('cmpChosen');
+  if(box){ const chosen=cmpSelected();
+    box.innerHTML=chosen.length?chosen.map(p=>`<span class="cmp-chip">${esc(p.name)}<span style="font-weight:400;opacity:.8"> · ${esc(p.grp==='מובילי בתי ספר'?p.role:p.grp)}</span><button data-cmprm="${esc(p.id)}" title="הסרה">×</button></span>`).join(''):'<span class="sub">עוד לא נבחר אף אחד. לחצי על אחד הכפתורים למעלה או סמני שמות ברשימה.</span>';
+    box.querySelectorAll('[data-cmprm]').forEach(x=>x.onclick=()=>{cmp.sel=cmp.sel.filter(i=>i!==x.dataset.cmprm); cmpSave(); cmpRefresh();}); }
+}
 function cmpRefreshPrev(){
   const sel=cmpSelected(), n=document.getElementById('cmpCount');
   if(n) n.textContent=sel.length?`נבחרו ${sel.length} נמענים`:'לא נבחרו נמענים';
@@ -1146,6 +1164,7 @@ function cmpRefreshPrev(){
   const c=sel.find(x=>x.id===cmp.pv)||sel[0], a=document.getElementById('cmpMailto');
   if(a){ if(c) a.href='mailto:'+encodeURIComponent(c.mail)+'?subject='+encodeURIComponent(cmpFill(cmp.subj,c))
       +'&body='+encodeURIComponent(cmpPlainFor(c)); else a.removeAttribute('href'); }
+  cmpHighlight();
 }
 function cmpBindList(){
   document.querySelectorAll('[data-cmpsel]').forEach(cb=>cb.onchange=()=>{
