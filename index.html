@@ -803,15 +803,19 @@ function cleanLeadName(n,schoolName){
 const cmpTeacherSlots=t=>cmpSlotTxt(CE.filter(c=>c.teacher&&nameMatch(t.name,c.teacher)).map(c=>curSlot(c)));
 const cmpSlotsOfMember=m=>{const em=String(m.email||'').trim().toLowerCase();
   const t=TEACHERS.find(x=>(em&&String(x.email||'').trim().toLowerCase()===em)||nameMatch(x.name,m.name)); return t?cmpTeacherSlots(t):''};
+const cmpSlotGenIds=(pool,sid,g)=>pool.filter(x=>x.grp==='מורים'&&cmpOk(x)&&(g?((x.sg||[]).includes(sid+'|'+g)||(x.sg||[]).includes(sid+'|שניהם')):(x.slotIds||[]).includes(sid))).map(x=>x.id);
+/* מובילי בתי ספר לפי הרצועה שבית הספר נרשם אליה (ומתחם: בנים / בנות; בית ספר מעורב נכלל בשניהם) */
+const cmpSchoolSlotIds=(pool,sid,g)=>pool.filter(x=>x.grp==='מובילי בתי ספר'&&cmpOk(x)&&(x.slotIds||[]).includes(sid)&&(!g||x.gen===g||x.gen==='מעורב')).map(x=>x.id);
 function cmpPool(){
   const p=[];
   TEAM.forEach((m,i)=>p.push({id:'m'+i,grp:'צוות ניהול',name:m.name,role:m.role,sigRole:m.sigRole||'',phone:m.phone||'',mail:m.email||'',slots:cmpSlotsOfMember(m)}));
   TEACHERS.forEach((t,i)=>p.push({id:'t'+i,grp:'מורים',name:t.name,
     role:CE.filter(c=>c.teacher&&nameMatch(t.name,c.teacher)).map(c=>c.name).join(' · ')||'מורה בקמפוס',mail:t.email||'',
     slots:cmpSlotTxt(CE.filter(c=>c.teacher&&nameMatch(t.name,c.teacher)).map(c=>curSlot(c))),
-    slotIds:[...new Set(CE.filter(c=>c.teacher&&nameMatch(t.name,c.teacher)).map(c=>curSlot(c)).filter(Boolean))]}));
+    slotIds:[...new Set(CE.filter(c=>c.teacher&&nameMatch(t.name,c.teacher)).map(c=>curSlot(c)).filter(Boolean))],
+    sg:[...new Set(CE.filter(c=>c.teacher&&nameMatch(t.name,c.teacher)&&curSlot(c)).map(c=>curSlot(c)+'|'+(curGen(c)||'שניהם')))]}));
   REGS.forEach((r,i)=>{if(r.lead||r.leadMail)
-    p.push({id:'s'+i,grp:'מובילי בתי ספר',name:cleanLeadName(r.lead||r.who||r.name,r.name),role:r.name,mail:r.leadMail||'',slots:cmpSlotTxt(r.slots||[])})});
+    p.push({id:'s'+i,grp:'מובילי בתי ספר',name:cleanLeadName(r.lead||r.who||r.name,r.name),role:r.name,mail:r.leadMail||'',slots:cmpSlotTxt(r.slots||[]),slotIds:(r.slots||[]).slice(),gen:(typeof genderOf==='function'?genderOf(r):'')})});
   return p;
 }
 /* כל כתובת מייל נספרת פעם אחת — מי שנמצא גם בצוות הניהול וגם בין המורים לא יקבל מייל כפול */
@@ -922,10 +926,21 @@ function vCompose(){
       <button class="btn ghost" data-cmpgrp="__none">ניקוי בחירה</button>
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px">
-      <span class="sub">מורים לפי רצועה (לחיצה בוחרת רק את מורי אותה רצועה):</span>
-      ${SLOTS.map(sl=>{const n=pool.filter(x=>x.grp==='מורים'&&cmpOk(x)&&(x.slotIds||[]).includes(sl.id)).length;
-        return `<button class="btn ghost mini" data-cmpslot="${sl.id}">${esc(sl.label)} · <span class="ltr">${sl.time}</span>${dayOf(sl)} (${n})</button>`;}).join('')}
+      <span class="sub">מורים לפי רצועה, בנים / בנות (לחיצה בוחרת רק אותם):</span>
     </div>
+    ${SLOTS.map(sl=>`<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:6px">
+      <b style="min-width:150px;font-size:13px">${esc(sl.label)} · <span class="ltr">${sl.time}</span>${dayOf(sl)}</b>
+      <button class="btn ghost mini" data-cmpslot="${sl.id}">כל המורים (${cmpSlotGenIds(pool,sl.id,'').length})</button>
+      <button class="btn ghost mini" data-cmpslot="${sl.id}" data-cmpgen="בנים">בנים (${cmpSlotGenIds(pool,sl.id,'בנים').length})</button>
+      <button class="btn ghost mini" data-cmpslot="${sl.id}" data-cmpgen="בנות">בנות (${cmpSlotGenIds(pool,sl.id,'בנות').length})</button>
+    </div>`).join('')}
+    <div class="sub" style="margin-top:12px">מובילי בתי ספר לפי רצועה, בנים / בנות (לחיצה בוחרת רק אותם):</div>
+    ${SLOTS.map(sl=>`<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:6px">
+      <b style="min-width:150px;font-size:13px">${esc(sl.label)} · <span class="ltr">${sl.time}</span>${dayOf(sl)}</b>
+      <button class="btn ghost mini" data-cmpsch="${sl.id}">כל בתי הספר (${cmpSchoolSlotIds(pool,sl.id,'').length})</button>
+      <button class="btn ghost mini" data-cmpsch="${sl.id}" data-cmpgen="בנים">בנים (${cmpSchoolSlotIds(pool,sl.id,'בנים').length})</button>
+      <button class="btn ghost mini" data-cmpsch="${sl.id}" data-cmpgen="בנות">בנות (${cmpSchoolSlotIds(pool,sl.id,'בנות').length})</button>
+    </div>`).join('')}
     <div style="margin-top:8px;font-weight:700;color:var(--brand)" id="cmpCount"></div>
     <details open style="margin-top:10px"><summary class="sub" style="cursor:pointer;font-weight:700">בחירה לפי שמות (אפשר לסמן אנשים ספציפיים)</summary>
       <input type="text" id="cmpQ" class="mlin" style="margin-top:8px" placeholder="חיפוש שם / תפקיד / בית ספר" value="${esc(cmp.q)}">
@@ -1156,10 +1171,14 @@ function wireCompose(){
     }
     cmpSave(); cmpRefresh();});
   document.querySelectorAll('[data-cmpslot]').forEach(b=>b.onclick=()=>{
-    const sid=+b.dataset.cmpslot, ids=cmpPool().filter(x=>x.grp==='מורים'&&cmpOk(x)&&(x.slotIds||[]).includes(sid)).map(x=>x.id);
-    if(!ids.length) return alert('אין מורים עם כתובת מייל ברצועה הזו.');
-    cmp.sel=ids.slice();   /* בוחר רק את מורי הרצועה (כדי לשלוח לכל רצועה בנפרד) */
+    const ids=cmpSlotGenIds(cmpPool(),+b.dataset.cmpslot,b.dataset.cmpgen||'');
+    if(!ids.length) return alert('אין מורים עם כתובת מייל בבחירה הזו.');
+    cmp.sel=ids.slice();   /* בוחר רק אותם (כדי לשלוח לכל רצועה / מתחם בנפרד) */
     cmpSave(); cmpRefresh();});
+  document.querySelectorAll('[data-cmpsch]').forEach(b=>b.onclick=()=>{
+    const ids=cmpSchoolSlotIds(cmpPool(),+b.dataset.cmpsch,b.dataset.cmpgen||'');
+    if(!ids.length) return alert('אין בתי ספר עם כתובת מייל בבחירה הזו.');
+    cmp.sel=ids.slice(); cmpSave(); cmpRefresh();});
   document.querySelectorAll('#cmpTb [data-cmd],#cmpTb [data-fld]').forEach(b=>{
     b.onmousedown=e=>e.preventDefault();
     b.onclick=()=>{
