@@ -821,7 +821,7 @@ function cmpPool(){
     sg:[...new Set(CE.filter(c=>c.teacher&&nameMatch(t.name,c.teacher)&&curSlot(c)).map(c=>curSlot(c)+'|'+(curGen(c)||'שניהם')))]}));
   REGS.forEach((r,i)=>{if(r.lead||r.leadMail)
     p.push({id:'s'+i,grp:'מובילי בתי ספר',name:cleanLeadName(r.lead||r.who||r.name,r.name),role:r.name,mail:r.leadMail||'',slots:cmpSlotTxt(r.slots||[]),slotIds:(r.slots||[]).slice(),gen:(typeof genderOf==='function'?genderOf(r):'')})});
-  return p;
+  return TEACHER_MODE?p.filter(x=>x.grp==='מובילי בתי ספר'):p;
 }
 /* כל כתובת מייל נספרת פעם אחת — מי שנמצא גם בצוות הניהול וגם בין המורים לא יקבל מייל כפול */
 const cmpSelected=()=>{const seen={}; return cmpPool().filter(p=>cmp.sel.includes(p.id)&&cmpOk(p)).filter(p=>{const k=String(p.mail).trim().toLowerCase(); if(seen[k]) return false; seen[k]=1; return true;});};
@@ -1025,7 +1025,7 @@ async function sendDirect(mode){
   if(mode==='send'){
     if(!confirm('לשלוח עכשיו ל-'+sel.length+' נמענים?\nאי אפשר לבטל שליחה.\n(תקבלי גם עותק לדוגמה למייל שלך.)')) return;
   }
-  const base={pin,sender:who.value,senderName:who.options[who.selectedIndex].dataset.name||'',logo:{b64:CMP_LOGO_B64,mime:'image/jpeg'},
+  const base={pin,role:TEACHER_MODE?'teacher':'team',sender:who.value,senderName:who.options[who.selectedIndex].dataset.name||'',logo:{b64:CMP_LOGO_B64,mime:'image/jpeg'},
     mails:sel.map(c=>({to:c.mail,name:c.name,subject:cmpFill(cmp.subj,c),html:cmpEmailHtml(c,true),body:cmpPlainFor(c)})),
     img:cmp.img?{name:cmp.img.name,mime:cmp.img.mime,mode:cmp.imgMode,b64:cmp.img.b64}:null};
   const post=async m=>{const r=await fetch(SEND_URL,{method:'POST',body:JSON.stringify(Object.assign({},base,{mode:m}))}); return r.json();};   // text/plain — בלי preflight
@@ -1250,6 +1250,122 @@ function wireCompose(){
     cmpSave(); render();};
   wireSend();
 }
+/* ================= מצב מורים: index.html?teachers (7.10.2026) =================
+   דף שליחה נפרד למורים באותו קובץ: בלי לשוניות ובלי דף הניהול. מורה בוחר את שמו, ורואה רק את בתי הספר
+   (מובילים) של הרצועות שהוא מלמד בהן. השרת מאפשר למורים לשלוח רק לאנשי קשר של בתי ספר. */
+const TEACHER_MODE=/[?&]teachers\b/.test(location.search);
+function tcStep(n,t){ return `<div style="display:flex;align-items:center;gap:9px;margin:22px 0 9px"><span style="background:var(--brand);color:#fff;border-radius:50%;width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex:none">${n}</span><b style="font-size:15.5px">${t}</b></div>`; }
+function vTeacher(){
+  const me=(()=>{try{return localStorage.getItem('chemed_tc_me')||''}catch(e){return ''}})().toLowerCase();
+  const ts=TEACHERS.filter(t=>t.email&&t.email.includes('@')).sort((a,b)=>a.name.localeCompare(b.name,'he'));
+  return `<div class="card"><h2>✉️ שליחת מייל לבתי הספר שלך</h2>
+    <div class="sub">קמפוס חמ"ד — הודעה למובילי בתי הספר שנמצאים איתך ברצועה.</div>
+
+    ${tcStep(1,'מי את/ה?')}
+    <div class="mlgrid">
+      <div><div class="sub">השם שלך (יופיע בחתימה, ותשובות יחזרו אלייך)</div>
+        <select id="sdWho" class="mlin"><option value="">— בחרו את שמכם —</option>${ts.map(t=>`<option value="${esc(t.email)}" data-name="${esc(t.name)}" data-role="מורה בקמפוס חמ&quot;ד" data-phone="${esc(t.phone||'')}" ${t.email.trim().toLowerCase()===me?'selected':''}>${esc(t.name)}</option>`).join('')}</select></div>
+      <div><div class="sub">קוד שליחה (נשמר במחשב הזה)</div><input type="text" id="sdPin" class="mlin" value="${esc(sdLoadPin())}" autocomplete="off" autocapitalize="off" spellcheck="false" style="direction:ltr"></div>
+    </div>
+
+    ${tcStep(2,'למי לשלוח?')}
+    <div id="tcButtons"></div>
+    <div class="cmp-chosen"><div style="font-weight:700;color:var(--brand)" id="cmpCount"></div>
+      <div id="cmpChosen" style="max-height:92px;overflow:auto;margin-top:4px"></div></div>
+    <details style="margin-top:10px"><summary class="sub" style="cursor:pointer;font-weight:700">בחירה לפי שמות (אפשר לסמן בתי ספר ספציפיים)</summary>
+      <input type="text" id="cmpQ" class="mlin" style="margin-top:8px" placeholder="חיפוש בית ספר / מוביל" value="${esc(cmp.q)}">
+      <div class="cmp-list" id="cmpList">${cmpListHtml()}</div>
+    </details>
+
+    ${tcStep(3,'מה כותבים?')}
+    <div class="sub">נושא המייל</div>
+    <input type="text" id="cmpSubj" class="mlin" value="${esc(cmp.subj)}" placeholder="למשל: תזכורת לקראת השיעור">
+    <div class="sub" style="margin-top:10px">תוכן (אפשר להוסיף שם פרטי, והמייל יותאם לכל אחד):</div>
+    <div class="cmp-tb" id="cmpTb">
+      <button class="btn ghost mini" data-cmd="bold"><b>B</b></button>
+      <button class="btn ghost mini" data-cmd="insertUnorderedList">• רשימה</button>
+      <button class="btn ghost mini" data-cmd="link">🔗 קישור</button>
+      <span style="margin-inline-start:auto" class="sub">הוספה אוטומטית:</span>
+      <button class="btn mini" data-fld="{שם פרטי}">שם פרטי</button>
+      <button class="btn mini" data-fld="{שיוך}">שם בית הספר</button>
+    </div>
+    <div class="cmp-ed" id="cmpEd" contenteditable="true" dir="rtl">${cmpClean(cmp.html)}</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px">
+      <b>🖼️ תמונה (אופציונלי)</b>
+      <input type="file" id="cmpImg" accept="image/*">
+      <button class="btn ghost mini" id="cmpImgDel">הסרת תמונה</button>
+      <span class="sub" id="cmpImgInfo">${cmp.img?esc(cmp.img.name)+' · '+Math.round(cmp.img.b64.length*0.75/1024)+' KB':'לא נבחרה תמונה'}</span>
+    </div>
+
+    ${tcStep(4,'בדיקה ושליחה')}
+    <div id="cmpPrev">${cmpPreviewHtml()}</div>
+    ${SEND_URL?`<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;align-items:center">
+      <button class="btn" id="sdSend" style="background:#b3261e;font-size:15px;padding:11px 20px">🚀 שלח לכולם</button>
+      <button class="btn ghost" id="sdTest">📨 שלחו לי רק בדיקה</button>
+      <button class="btn ghost" id="cmpReset" style="margin-inline-start:auto">🗑️ מחיקת הטיוטה והתחלה מחדש</button>
+    </div>
+    <div class="sub" style="margin-top:6px">"שלח לכולם" שולח קודם עותק לדוגמה אלייך, ואחר כך לנבחרים.</div>
+    <div id="sdOut" style="margin-top:8px;font-size:13.5px"></div>`:`<div class="note" style="margin-top:12px">השליחה הישירה עדיין לא הופעלה.</div><button class="btn ghost" id="cmpReset" style="margin-top:8px">🗑️ מחיקת הטיוטה והתחלה מחדש</button>`}
+
+    <div style="display:none">
+      <select id="cmpTheme">${Object.keys(CMP_THEMES).map(k=>`<option value="${k}" ${cmp.theme===k?'selected':''}>${CMP_THEMES[k].n}</option>`).join('')}</select>
+      <input id="cmpTitle" value="${esc(cmp.title)}"><input id="cmpSign" value="{שולח}"><input type="color" id="cmpColor" value="#3b4a9e">
+      <select id="cmpImgMode"><option value="inline" selected>inline</option><option value="attach">attach</option></select>
+      <button id="cmpCopy"></button><a id="cmpMailto"></a><button id="cmpScriptCopy"></button><button id="cmpScript"></button>
+    </div>
+  </div>`;
+}
+/* כפתורי הרצועות של המורה הנבחר: רק בתי הספר של הרצועות (ומתחם בנים/בנות) שהוא מלמד בהן */
+function tcRenderButtons(){
+  const box=document.getElementById('tcButtons'), w=document.getElementById('sdWho'); if(!box) return;
+  const email=w&&w.value?w.value.trim().toLowerCase():'';
+  const t=email?TEACHERS.find(x=>String(x.email||'').trim().toLowerCase()===email):null;
+  if(!t){ box.innerHTML='<div class="note">בחרו קודם את שמכם בשלב 1, ואז יופיעו כאן בתי הספר של הרצועות שלכם.</div>'; cmpHighlight(); return; }
+  const pool=cmpPool(), combos=new Map();
+  CE.filter(c=>c.teacher&&nameMatch(t.name,c.teacher)&&curSlot(c)).forEach(c=>{
+    const g=curGen(c), gs=(g==='בנים'||g==='בנות')?[g]:['בנים','בנות'];
+    gs.forEach(x=>combos.set(curSlot(c)+'|'+x,{sid:curSlot(c),g:x}));});
+  const list=[...combos.values()].sort((a,b)=>a.sid-b.sid||a.g.localeCompare(b.g,'he'));
+  if(!list.length){ box.innerHTML='<div class="note">לא נמצא שיבוץ שלכם בקורסים. אפשר לבחור בתי ספר ידנית מהרשימה למטה.</div>'; cmpHighlight(); return; }
+  box.innerHTML='<div class="sub">בתי הספר ברצועות שלך (לחיצה בוחרת רק אותם, לחיצה נוספת מבטלת):</div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">'
+    +list.map(o=>{const sl=SLOTS[o.sid-1], n=cmpSchoolSlotIds(pool,o.sid,o.g).length;
+      return `<button class="btn ghost" data-cmpsch="${o.sid}" data-cmpgen="${o.g}" title="${sl.time}">${esc(sl.label)}${sl.day&&sl.day!=='שלישי'?' (יום '+esc(sl.day)+')':''} ${o.g} · בתי ספר (${n})</button>`;}).join('')+'</div>';
+  box.querySelectorAll('[data-cmpsch]').forEach(b=>b.onclick=()=>{
+    const ids=cmpSchoolSlotIds(cmpPool(),+b.dataset.cmpsch,b.dataset.cmpgen||'');
+    if(!ids.length) return alert('אין בתי ספר עם כתובת מייל בבחירה הזו.');
+    const cur=cmpSelected().map(x=>x.id), same=cur.length===ids.length&&ids.every(i=>cur.includes(i));
+    cmp.sel=same?[]:ids.slice(); cmpSave(); cmpRefresh();});
+  cmpHighlight();
+}
+function wireTeacher(){
+  const w=document.getElementById('sdWho'); if(!w) return;
+  w.addEventListener('change',()=>{ try{localStorage.setItem('chemed_tc_me',w.value)}catch(e){} tcRenderButtons(); });
+  tcRenderButtons();
+}
+/* כניסה: קוד שליחה נבדק מול השרת לפני שמוצג משהו */
+async function teacherEntry(){
+  document.title='✉️ שליחת מיילים — מורי קמפוס חמ"ד';
+  const tb=document.querySelector('.topbar'); if(tb) tb.style.display='none';
+  const nv=document.getElementById('nav'); if(nv) nv.style.display='none';
+  const check=async pin=>{ try{ const r=await fetch(SEND_URL,{method:'POST',body:JSON.stringify({pin,mode:'check',role:'teacher'})}); const j=await r.json(); return j.ok?'':(j.error||'שגיאה'); }catch(e){ return 'שגיאת תקשורת — בדקו חיבור לאינטרנט'; } };
+  const saved=sdLoadPin();
+  if(saved && !(await check(saved))){ boot(); return; }
+  const ov=document.createElement('div');
+  ov.style.cssText='position:fixed;inset:0;z-index:9999;background:#f4f5fb;display:flex;align-items:center;justify-content:center;padding:16px';
+  ov.innerHTML='<form style="background:#fff;border:1px solid #dfe2f0;border-radius:16px;padding:26px 24px;width:100%;max-width:340px;text-align:center;box-shadow:0 8px 30px rgba(40,50,110,.12)">'
+    +'<div style="font-size:30px">✉️</div><h2 style="margin:6px 0 4px;font-size:18px">שליחת מיילים — מורי קמפוס חמ"ד</h2>'
+    +'<div style="font-size:13px;color:#667;margin-bottom:14px">הקלידו את קוד השליחה כדי להיכנס.</div>'
+    +'<input type="text" id="tcPin" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="קוד שליחה" style="width:100%;box-sizing:border-box;padding:10px 12px;font:inherit;border:1px solid #cfd3e6;border-radius:10px;text-align:center;direction:ltr">'
+    +'<div id="tcErr" style="color:#b3261e;font-size:12.5px;min-height:18px;margin:6px 0"></div>'
+    +'<button class="btn" style="width:100%;padding:10px;border-radius:10px">כניסה</button></form>';
+  document.body.appendChild(ov);
+  const f=ov.querySelector('form'), inp=ov.querySelector('#tcPin'), er=ov.querySelector('#tcErr'); inp.focus();
+  f.onsubmit=async e=>{ e.preventDefault(); er.textContent='בודק…';
+    const m=await check(inp.value.trim());
+    if(m){ er.textContent=m; inp.select(); return; }
+    try{ localStorage.setItem('chemed_sdpin',inp.value.trim()); }catch(x){}
+    ov.remove(); boot(); };
+}
 const TABS=[{k:'assign',n:'לוח שיבוץ'},{k:'courses',n:'קורסים ובתי ספר'},
             {k:'roster',n:'מצבת מורים'},{k:'sched',n:'לו"ז'},{k:'contacts',n:'אנשי קשר'},{k:'compose',n:'ניסוח מייל'}];
 let tab='assign';
@@ -1257,6 +1373,7 @@ let tab='assign';
   if(h && TABS.some(t=>t.k===h)) tab=h;})();
 
 function render(){
+  if(TEACHER_MODE){ document.getElementById('nav').innerHTML=''; document.getElementById('view').innerHTML=vTeacher(); wire(); wireTeacher(); return; }
   try{ if(('#'+tab)!==location.hash) history.replaceState(null,'','#'+tab); }catch(e){}
   const badge={courses:CE.length,assign:unslotted().length,roster:TEACHERS.length,sched:SHEET_EVS.length,contacts:TEAM.length+TEACHERS.length+REGS.length};
   document.getElementById('nav').innerHTML=TABS.map(t=>
@@ -1277,6 +1394,7 @@ function wire(){ wireCompose();
 }
 
 function bar(kind,html){
+  if(TEACHER_MODE&&kind==='live'){ const o=document.getElementById('offbar'); if(o) o.innerHTML=''; return; }
   const el=document.getElementById('offbar');
   const cls=kind==='live'?'card note ok':'card note bad';
   el.innerHTML='<div class="'+cls+'" style="background:'+(kind==='live'?'var(--ok-soft)':'var(--bad-soft)')+';color:'+(kind==='live'?'#0b5c40':'#8e2318')+';border-radius:10px;padding:11px 13px;font-size:12.5px">'+html+'</div>';
@@ -1315,7 +1433,7 @@ async function boot(quiet){
     linkAndBuild();
     bar('live','<b>מחובר לגיליון.</b> הנתונים נטענו ישירות מהגיליון · עודכן: '+fmtAt(d.at)+'. מתעדכן אוטומטית כל כמה דקות.');
     const y=window.scrollY, q=(document.getElementById('ccSearch')||{}).value;
-    render();
+    if(!(quiet&&(tab==='compose'||TEACHER_MODE))) render();   /* לא מרנדרים מחדש תוך כדי כתיבת מייל */
     const cs=document.getElementById('ccSearch');
     if(quiet&&cs&&q){ cs.value=q; cs.dispatchEvent(new Event('input')); }
     if(quiet) window.scrollTo(0,y);
@@ -1383,7 +1501,7 @@ function showGate(){
     try{ localStorage.setItem('chemedViewUntil',String(Date.now()+30*864e5)); }catch(x){}
     ov.remove(); boot(); };
 }
-if(unlocked()) boot(); else showGate();
+if(TEACHER_MODE) teacherEntry(); else if(unlocked()) boot(); else showGate();
 </script>
 </body>
 </html>
