@@ -793,7 +793,7 @@ function mlCopy(t,el,done){
 const CMP_THEMES={clean:{n:'נקי, בלי כותרת',c:''},navy:{n:'כותרת כחולה',c:'#3b4a9e'},
   brass:{n:'כותרת זהב',c:'#a8783a'},green:{n:'כותרת ירוקה',c:'#2f7d5b'}};
 let cmp=Object.assign({subj:'',title:'קמפוס חמ"ד תשפ"ז',theme:'navy',sign:'{שולח}',
-  html:'<p>שלום {שם פרטי},</p><p>כאן כותבים את תוכן המייל.</p>',sel:[],q:'',pv:'',img:null,imgMode:'inline'},cmpLoad());
+  html:'<p>שלום {שם},</p><p>כאן כותבים את תוכן המייל.</p>',sel:[],q:'',pv:'',img:null,imgMode:'inline'},cmpLoad());
 const cmpSave=()=>{try{const o=Object.assign({},cmp); delete o.img; localStorage.setItem('chemed_view_cmp',JSON.stringify(o))}catch(e){}};
 const cmpOk=p=>!!p.mail&&p.mail.includes('@');
 /* {רצועות} — השעות של כל נמען: לבית ספר = הרצועות שנרשם אליהן, למורה = הרצועות של הקורסים שלו, ואחרת = כל הרצועות */
@@ -838,7 +838,7 @@ function cmpPlain(h){
     .replace(/<li[^>]*>/gi,'• $&').replace(/<\/(p|div|h[1-6]|li|ul|ol)>/gi,'\n$&'),'text/html');
   return d.body.textContent.replace(/\n{3,}/g,'\n\n').trim();
 }
-const cmpFirst=c=>(c.name||'').split(/\s+/)[0]||c.name;
+const cmpFirst=c=>(c.name||'').replace(/\s+/g,' ').trim();   /* השדה {שם פרטי} מחזיר את השם המלא (כולל תואר, למשל "הרב תומר כספי") */
 const cmpFill=(s,c)=>String(s).replace(/\{שם פרטי\}/g,cmpFirst(c)).replace(/\{שם\}/g,c.name).replace(/\{שיוך\}/g,c.role).replace(/\{רצועות\}/g,c.slots||cmpAllSlots());
 const cmpFillH=(s,c)=>String(s).replace(/\{שם פרטי\}/g,esc(cmpFirst(c))).replace(/\{שם\}/g,esc(c.name)).replace(/\{שיוך\}/g,esc(c.role)).replace(/\{רצועות\}/g,esc(c.slots||cmpAllSlots()));
 /* חתימה = שם השולח/ת שנבחר בסעיף "שליחה ישירה". {שולח} מוחלף בשמו; כשלא נבחר איש — "צוות קמפוס חמ\"ד" */
@@ -954,7 +954,7 @@ function vCompose(){
       <button class="btn ghost mini" data-cmd="insertUnorderedList">• רשימה</button>
       <button class="btn ghost mini" data-cmd="link">🔗 קישור</button>
       <span style="margin-inline-start:auto" class="sub">הוספה אוטומטית:</span>
-      <button class="btn mini" data-fld="{שם פרטי}">שם פרטי</button>
+      <button class="btn mini" data-fld="{שם}">שם</button>
       <button class="btn mini" data-fld="{רצועות}">רצועות</button>
     </div>
     <div class="cmp-ed" id="cmpEd" contenteditable="true" dir="rtl">${cmpClean(cmp.html)}</div>
@@ -1247,7 +1247,7 @@ function wireCompose(){
   document.getElementById('cmpReset').onclick=()=>{
     if(!confirm('לאפס את הטיוטה (נושא, גוף ובחירת נמענים)?')) return;
     cmp=Object.assign({},{subj:'',title:'קמפוס חמ"ד תשפ"ז',theme:'navy',sign:'{שולח}',
-      html:'<p>שלום {שם פרטי},</p><p>כאן כותבים את תוכן המייל.</p>',sel:[],q:'',pv:'',img:null,imgMode:'inline'});
+      html:'<p>שלום {שם},</p><p>כאן כותבים את תוכן המייל.</p>',sel:[],q:'',pv:'',img:null,imgMode:'inline'});
     cmpSave(); render();};
   wireSend();
 }
@@ -1290,7 +1290,7 @@ function vTeacher(){
       <button class="btn ghost mini" data-cmd="insertUnorderedList">• רשימה</button>
       <button class="btn ghost mini" data-cmd="link">🔗 קישור</button>
       <span style="margin-inline-start:auto" class="sub">הוספה אוטומטית:</span>
-      <button class="btn mini" data-fld="{שם פרטי}">שם פרטי</button>
+      <button class="btn mini" data-fld="{שם}">שם</button>
       <button class="btn mini" data-fld="{שיוך}">שם בית הספר</button>
     </div>
     <div class="cmp-ed" id="cmpEd" contenteditable="true" dir="rtl">${cmpClean(cmp.html)}</div>
