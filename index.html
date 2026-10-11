@@ -808,7 +808,8 @@ function cmpPool(){
   TEAM.forEach((m,i)=>p.push({id:'m'+i,grp:'צוות ניהול',name:m.name,role:m.role,sigRole:m.sigRole||'',phone:m.phone||'',mail:m.email||'',slots:cmpSlotsOfMember(m)}));
   TEACHERS.forEach((t,i)=>p.push({id:'t'+i,grp:'מורים',name:t.name,
     role:CE.filter(c=>c.teacher&&nameMatch(t.name,c.teacher)).map(c=>c.name).join(' · ')||'מורה בקמפוס',mail:t.email||'',
-    slots:cmpSlotTxt(CE.filter(c=>c.teacher&&nameMatch(t.name,c.teacher)).map(c=>curSlot(c)))}));
+    slots:cmpSlotTxt(CE.filter(c=>c.teacher&&nameMatch(t.name,c.teacher)).map(c=>curSlot(c))),
+    slotIds:[...new Set(CE.filter(c=>c.teacher&&nameMatch(t.name,c.teacher)).map(c=>curSlot(c)).filter(Boolean))]}));
   REGS.forEach((r,i)=>{if(r.lead||r.leadMail)
     p.push({id:'s'+i,grp:'מובילי בתי ספר',name:cleanLeadName(r.lead||r.who||r.name,r.name),role:r.name,mail:r.leadMail||'',slots:cmpSlotTxt(r.slots||[])})});
   return p;
@@ -919,6 +920,11 @@ function vCompose(){
       ${grps.map(g=>`<button class="btn" data-cmpgrp="${esc(g)}">${esc(g)}</button>`).join('')}
       <button class="btn" data-cmpgrp="__all">כולם</button>
       <button class="btn ghost" data-cmpgrp="__none">ניקוי בחירה</button>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px">
+      <span class="sub">מורים לפי רצועה (לחיצה בוחרת רק את מורי אותה רצועה):</span>
+      ${SLOTS.map(sl=>{const n=pool.filter(x=>x.grp==='מורים'&&cmpOk(x)&&(x.slotIds||[]).includes(sl.id)).length;
+        return `<button class="btn ghost mini" data-cmpslot="${sl.id}">${esc(sl.label)} · <span class="ltr">${sl.time}</span>${dayOf(sl)} (${n})</button>`;}).join('')}
     </div>
     <div style="margin-top:8px;font-weight:700;color:var(--brand)" id="cmpCount"></div>
     <details style="margin-top:6px"><summary class="sub" style="cursor:pointer">בחירה לפי שמות (אופציונלי)</summary>
@@ -1148,6 +1154,11 @@ function wireCompose(){
       const ids=pool.filter(p=>g==='__all'||p.grp===g).map(p=>p.id);
       cmp.sel=ids.every(i=>cmp.sel.includes(i))?cmp.sel.filter(i=>!ids.includes(i)):[...new Set([...cmp.sel,...ids])];
     }
+    cmpSave(); cmpRefresh();});
+  document.querySelectorAll('[data-cmpslot]').forEach(b=>b.onclick=()=>{
+    const sid=+b.dataset.cmpslot, ids=cmpPool().filter(x=>x.grp==='מורים'&&cmpOk(x)&&(x.slotIds||[]).includes(sid)).map(x=>x.id);
+    if(!ids.length) return alert('אין מורים עם כתובת מייל ברצועה הזו.');
+    cmp.sel=ids.slice();   /* בוחר רק את מורי הרצועה (כדי לשלוח לכל רצועה בנפרד) */
     cmpSave(); cmpRefresh();});
   document.querySelectorAll('#cmpTb [data-cmd],#cmpTb [data-fld]').forEach(b=>{
     b.onmousedown=e=>e.preventDefault();
