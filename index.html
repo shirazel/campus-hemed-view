@@ -1032,7 +1032,7 @@ async function sendDirect(mode){
   const base={pin,role:TEACHER_MODE?'teacher':'team',sender:who.value,senderName:who.options[who.selectedIndex].dataset.name||'',logo:{b64:CMP_LOGO_B64,mime:'image/jpeg'},
     mails:sel.map(c=>({to:c.mail,name:c.name,subject:cmpFill(cmp.subj,c),html:cmpEmailHtml(c,true),body:cmpPlainFor(c)})),
     img:cmp.img?{name:cmp.img.name,mime:cmp.img.mime,mode:cmp.imgMode,b64:cmp.img.b64}:null};
-  const post=async m=>{const r=await fetch(SEND_URL,{method:'POST',body:JSON.stringify(Object.assign({},base,{mode:m}))}); return r.json();};   // text/plain — בלי preflight
+  const post=async m=>{const r=await fetch(SEND_URL,{method:'POST',body:JSON.stringify(Object.assign({},base,{mode:m})).replace(/[\u0080-\uffff]/g,ch=>'\\u'+ch.charCodeAt(0).toString(16).padStart(4,'0'))}); return r.json();};   /* כל תו שאינו ASCII (אימוג'י, עברית) נשלח כ-\uXXXX, כדי שהשרת לא יפענח אותו לא נכון */   // text/plain — בלי preflight
   const bad=j=>'<b style="color:#b3261e">לא נשלח:</b> '+esc(j.error||'שגיאה')+(j.rejected?'<br>'+j.rejected.map(esc).join(', '):'');
   const btns=['sdTest','sdSend'].map(id=>document.getElementById(id));
   btns.forEach(b=>b.disabled=true);
