@@ -878,13 +878,16 @@ function cmpSignPlainFor(){
   return (s.name||'צוות קמפוס חמ"ד')+'\n'+cmpSignRole(s)+' — '+CMP_TAG+'\nאתר הקמפוס: '+CMP_SITE+(wa?'\nוואטסאפ: '+wa:'');
 }
 const cmpSignText=()=>{const t=(!cmp.sign||cmp.sign==='צוות קמפוס חמ"ד'||cmp.sign==='שירה')?'{שולח}':String(cmp.sign||'');   /* טיוטות ישנות ששמורות עם "שירה" / "צוות קמפוס חמ\"ד" נחשבות ברירת מחדל */ return t.replace(/\{שולח\}/g,cmpSenderName()||'צוות קמפוס חמ"ד')};
+/* אימוג'י מורכבים (👋 📌) מתקלקלים בדרך לשרת השליחה: בגוף ה-HTML הופכים אותם לקוד &#NNN; (מוצג נכון בכל מייל); בנושא ובטקסט הפשוט מסירים אותם */
+const cmpAstH=s=>String(s).replace(/[\ud800-\udbff][\udc00-\udfff]/g,m=>'&#'+m.codePointAt(0)+';');
+const cmpAstX=s=>String(s).replace(/[\ud800-\udbff][\udc00-\udfff]/g,'').replace(/[ \t]+\n/g,'\n');
 function cmpEmailHtml(c,forScript){
   const th=CMP_THEMES[cmp.theme]||CMP_THEMES.navy;
   const body=cmpFillH(cmpClean(cmp.html),c);
   const head=th.c?`<div style="background:${th.c};color:#ffffff;padding:18px 24px;font-size:20px;font-weight:bold">${esc(cmp.title)}</div>`:'';
   const sign=cmpSignIsDefault()?cmpSignBlockFor(forScript):(cmpSignText()?`<p style="margin:22px 0 0">${esc(cmpSignText())}</p>`:'');
   const img=(cmp.img&&cmp.imgMode==='inline')?`<p style="margin:18px 0 0;text-align:center"><img src="${forScript?'cid:img1':'data:'+cmp.img.mime+';base64,'+cmp.img.b64}" alt="" style="max-width:100%;height:auto;border-radius:8px"></p>`:'';
-  return `<div dir="rtl" style="background:#f5f6fb;padding:18px;font-family:Arial,Helvetica,sans-serif"><div style="max-width:620px;margin:0 auto;background:#ffffff;border-radius:10px;overflow:hidden;border:1px solid #e4e7f0">${head}<div style="padding:22px 24px;font-size:15px;line-height:1.7;color:#1e2338;text-align:right">${body}${img}${sign}</div></div></div>`;
+  return cmpAstH(`<div dir="rtl" style="background:#f5f6fb;padding:18px;font-family:Arial,Helvetica,sans-serif"><div style="max-width:620px;margin:0 auto;background:#ffffff;border-radius:10px;overflow:hidden;border:1px solid #e4e7f0">${head}<div style="padding:22px 24px;font-size:15px;line-height:1.7;color:#1e2338;text-align:right">${body}${img}${sign}</div></div></div>`);
 }
 const cmpPlainFor=c=>cmpFill(cmpPlain(cmp.html),c)+(cmpSignIsDefault()?'\n\n'+cmpSignPlainFor():(cmpSignText()?'\n\n'+cmpSignText():''));
 function cmpListHtml(){
@@ -1030,7 +1033,7 @@ async function sendDirect(mode){
     if(!confirm('לשלוח עכשיו ל-'+sel.length+' נמענים?\nאי אפשר לבטל שליחה.\n(תקבלי גם עותק לדוגמה למייל שלך.)')) return;
   }
   const base={pin,role:TEACHER_MODE?'teacher':'team',sender:who.value,senderName:who.options[who.selectedIndex].dataset.name||'',logo:{b64:CMP_LOGO_B64,mime:'image/jpeg'},
-    mails:sel.map(c=>({to:c.mail,name:c.name,subject:cmpFill(cmp.subj,c),html:cmpEmailHtml(c,true),body:cmpPlainFor(c)})),
+    mails:sel.map(c=>({to:c.mail,name:c.name,subject:cmpAstX(cmpFill(cmp.subj,c)),html:cmpEmailHtml(c,true),body:cmpAstX(cmpPlainFor(c))})),
     img:cmp.img?{name:cmp.img.name,mime:cmp.img.mime,mode:cmp.imgMode,b64:cmp.img.b64}:null};
   const post=async m=>{const r=await fetch(SEND_URL,{method:'POST',body:JSON.stringify(Object.assign({},base,{mode:m})).replace(/[\u0080-\uffff]/g,ch=>'\\u'+ch.charCodeAt(0).toString(16).padStart(4,'0'))}); return r.json();};   /* כל תו שאינו ASCII (אימוג'י, עברית) נשלח כ-\uXXXX, כדי שהשרת לא יפענח אותו לא נכון */   // text/plain — בלי preflight
   const bad=j=>'<b style="color:#b3261e">לא נשלח:</b> '+esc(j.error||'שגיאה')+(j.rejected?'<br>'+j.rejected.map(esc).join(', '):'');
@@ -1064,7 +1067,7 @@ function wireSend(){
 }
 function cmpScript(){
   const sel=cmpSelected();
-  const rows=sel.map(c=>({name:c.name,to:c.mail,subject:cmpFill(cmp.subj,c),html:cmpEmailHtml(c,true),body:cmpPlainFor(c)}));
+  const rows=sel.map(c=>({name:c.name,to:c.mail,subject:cmpAstX(cmpFill(cmp.subj,c)),html:cmpEmailHtml(c,true),body:cmpAstX(cmpPlainFor(c))}));
   const imgDef=cmp.img?JSON.stringify({name:cmp.img.name,mime:cmp.img.mime,mode:cmp.imgMode,b64:cmp.img.b64}):'null';
   return `/**
  * שליחת מייל מעוצב לנבחרים — קמפוס חמ"ד תשפ"ז
